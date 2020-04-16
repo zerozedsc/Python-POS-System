@@ -1,0 +1,1 @@
+pyinstaller -F -i"info.ico" -n "INFO APP 101"  --hidden-import pkg_resources.py2_warn --windowed session_start.py

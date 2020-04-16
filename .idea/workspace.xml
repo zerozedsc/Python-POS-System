@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="0b89bc54-e3fb-4bec-89e3-06c862b89736" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectId" id="1XugEwRbk6mdM44YfhnhWIHn40x" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+  </component>
+  <component name="RunManager" selected="Python.session_start">
+    <configuration name="admin_page" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Inventory Management System" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/admin_page.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="callDB" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Inventory Management System" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/data" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data/callDB.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="cashier_win" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Inventory Management System" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/cashier_win.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="session_start" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Inventory Management System" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/session_start.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Inventory Management System" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.session_start" />
+        <item itemvalue="Python.cashier_win" />
+        <item itemvalue="Python.test" />
+        <item itemvalue="Python.callDB" />
+        <item itemvalue="Python.admin_page" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="0b89bc54-e3fb-4bec-89e3-06c862b89736" name="Default Changelist" comment="" />
+      <created>1581901288793</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1581901288793</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="704" y="272" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1587013661702">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="587" y="225" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1600.860@0.0.1600.860" timestamp="1582705043341" />
+    <state x="704" y="272" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1587013661702" />
+    <state x="480" y="159" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1582692397834">
+      <screen x="0" y="0" width="1600" height="860" />
+    </state>
+    <state x="480" y="159" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.0.1600.860@0.0.1600.860" timestamp="1582692397834" />
+    <state x="530" y="177" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1582709810471">
+      <screen x="0" y="0" width="1600" height="860" />
+    </state>
+    <state x="530" y="177" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1600.860@0.0.1600.860" timestamp="1582709810471" />
+    <state x="92" y="92" width="1416" height="676" key="DiffContextDialog" timestamp="1582425197051">
+      <screen x="0" y="0" width="1600" height="860" />
+    </state>
+    <state x="92" y="92" width="1416" height="676" key="DiffContextDialog/0.0.1600.860@0.0.1600.860" timestamp="1582425197051" />
+    <state x="580" y="184" key="FileChooserDialogImpl" timestamp="1583118987371">
+      <screen x="0" y="0" width="1600" height="860" />
+    </state>
+    <state x="580" y="184" key="FileChooserDialogImpl/0.0.1600.860@0.0.1600.860" timestamp="1583118987371" />
+    <state width="552" height="898" key="GridCell.Tab.0.bottom" timestamp="1587014234686">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="458" height="718" key="GridCell.Tab.0.bottom/0.0.1600.860@0.0.1600.860" timestamp="1584112050736" />
+    <state width="552" height="898" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1587014234686" />
+    <state width="858" height="115" key="GridCell.Tab.0.bottom/0.0.900.1560@0.0.900.1560" timestamp="1582295048886" />
+    <state width="552" height="898" key="GridCell.Tab.0.center" timestamp="1587014234686">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="458" height="718" key="GridCell.Tab.0.center/0.0.1600.860@0.0.1600.860" timestamp="1584112050736" />
+    <state width="552" height="898" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1587014234686" />
+    <state width="858" height="115" key="GridCell.Tab.0.center/0.0.900.1560@0.0.900.1560" timestamp="1582295048886" />
+    <state width="552" height="898" key="GridCell.Tab.0.left" timestamp="1587014234685">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="458" height="718" key="GridCell.Tab.0.left/0.0.1600.860@0.0.1600.860" timestamp="1584112050736" />
+    <state width="552" height="898" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1587014234685" />
+    <state width="858" height="115" key="GridCell.Tab.0.left/0.0.900.1560@0.0.900.1560" timestamp="1582295048886" />
+    <state width="552" height="898" key="GridCell.Tab.0.right" timestamp="1587014234686">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="458" height="718" key="GridCell.Tab.0.right/0.0.1600.860@0.0.1600.860" timestamp="1584112050736" />
+    <state width="552" height="898" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1587014234686" />
+    <state width="858" height="115" key="GridCell.Tab.0.right/0.0.900.1560@0.0.900.1560" timestamp="1582295048886" />
+    <state x="468" y="253" key="com.intellij.ide.util.TipDialog" timestamp="1584172624699">
+      <screen x="0" y="0" width="1600" height="860" />
+    </state>
+    <state x="468" y="253" key="com.intellij.ide.util.TipDialog/0.0.1600.860@0.0.1600.860" timestamp="1584172624699" />
+    <state x="237" y="459" key="com.intellij.ide.util.TipDialog/0.0.900.1560@0.0.900.1560" timestamp="1582342645730" />
+    <state x="463" y="180" width="672" height="678" key="search.everywhere.popup" timestamp="1582540692876">
+      <screen x="0" y="0" width="1600" height="860" />
+    </state>
+    <state x="463" y="180" width="672" height="678" key="search.everywhere.popup/0.0.1600.860@0.0.1600.860" timestamp="1582540692876" />
+  </component>
+</project>
