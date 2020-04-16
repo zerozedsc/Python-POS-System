@@ -1,18 +1,16 @@
 import errno
-import random
 import sqlite3
 import tkinter as tk
 import tkinter.simpledialog as sd
 from datetime import datetime
 from tkinter import *
-from tkinter import filedialog
 from tkinter import messagebox
 from tkinter.ttk import *
 from tkinter.ttk import Style
-from PIL import Image, ImageTk
 import os
 from sys import exit
 import time
+from server import SERVER_PATH as PATH
 
 
 class CashierWin():
@@ -37,7 +35,7 @@ class CashierWin():
         self.n = 0
         self.k = 0
         self.p = 0
-        self.dbPath = '//Zerozed-pc/shared/DB/ROZERIYA-DB.db'
+        self.dbPath = PATH
         self.totalMoney = 0
         self.totalBuy = 0
         self.printIntro = True
@@ -872,4 +870,4 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
     # report GET
 
 
-# CashierWin(Tk(), ID='RZ0000E005')
+CashierWin(Tk(), ID='RZ0000E005')

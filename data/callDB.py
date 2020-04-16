@@ -3,10 +3,11 @@ import tkinter as tk
 from tkinter import messagebox, filedialog
 from tkinter import *
 import os
+from server import SERVER_PATH as PATH
 
 class callDB():
     def __init__(self):
-        pathDB = '//Zerozed-pc/shared/DB/ROZERIYA-DB.db'
+        pathDB = PATH
         try:
             self.conn = sqlite3.connect(pathDB)  # \\Zerozed-pc\shared\DB
             self.cursor = self.conn.cursor()

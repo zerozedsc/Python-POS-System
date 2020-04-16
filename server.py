@@ -8,12 +8,13 @@ from datetime import datetime
 import tkinter as tk
 import sqlite3
 
+SERVER_PATH = '//Zerozed-pc/shared/DB/ROZERIYA-DB.db'
 
 class Server():
     def __init__(self):
 
         try:
-            self.conn = sqlite3.connect('//Zerozed-pc/shared/DB/ROZERIYA-DB.db')  # \\Zerozed-pc\shared\DB
+            self.conn = sqlite3.connect(SERVER_PATH)  # \\Zerozed-pc\shared\DB
             self.cursor = self.conn.cursor()
             print("YOU ARE CONNECTED TO -", "DATABASE" , "\n")
             self.test = True
