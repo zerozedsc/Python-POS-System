@@ -13,7 +13,10 @@ import os
 from sys import exit
 import psycopg2
 import time
+from server import SERVER_PATH
 
+#Path
+EMPLOYEE_PHOTO_PATH = "data/Employee Data/Employee_Photos/"
 
 class AdminWin():
     def __init__(self, master, ID='', POS=''):
@@ -105,7 +108,7 @@ class AdminWin():
     def queryStock(self, data='product_data'):
 
         try:
-            conn = sqlite3.connect('//Zerozed-pc/shared/DB/ROZERIYA-DB.db')
+            conn = sqlite3.connect(SERVER_PATH)
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM PRODUCT ORDER BY PRODUCT_ID;")
             query1 = cursor.fetchall()
@@ -132,7 +135,7 @@ class AdminWin():
                 query2 = cursor.fetchall()
             product = []
             product_data = []
-            print("YOU ARE CONNECTED TO DATABASE")
+            # print("YOU ARE CONNECTED TO DATABASE")    #debug
             if data == 'product':
                 for i in query1:
                     for x in i:
@@ -152,6 +155,7 @@ class AdminWin():
         except (Exception, sqlite3.Error) as error:
             self.check = False
             print("Error while connecting to database ", error)
+            messagebox.showerror("Database Error", error)
 
     def showStock(self, param=None):
         # FRAME
@@ -269,7 +273,7 @@ class AdminWin():
         d = datetime.now()
         self.timestamp = d.timestamp()
         try:
-            conn = conn = sqlite3.connect('//Zerozed-pc/shared/DB/ROZERIYA-DB.db')  # \\Zerozed-pc\shared\DB
+            conn = conn = sqlite3.connect(SERVER_PATH)  # \\Zerozed-pc\shared\DB
             cursor = conn.cursor()
             print("YOU ARE CONNECTED TO DATABASE")
             print(ID, NAMA, JENIS, HARGA, STOCK)
@@ -413,7 +417,7 @@ class AdminWin():
         HARGA = self.getPriceA.get()
         STOCK = self.getQtyA.get()
         try:
-            conn = sqlite3.connect('//Zerozed-pc/shared/DB/ROZERIYA-DB.db')  # \\Zerozed-pc\shared\DB
+            conn = sqlite3.connect(SERVER_PATH)  # \\Zerozed-pc\shared\DB
             cursor = conn.cursor()
             print("YOU ARE CONNECTED TO DATABASE")
             print(ID, NAMA, JENIS, HARGA, STOCK)
@@ -513,7 +517,7 @@ class AdminWin():
             if self.adjust.upper() in self.check_productID:
                 if "RZ" and 'P' in self.adjust.upper() or len(self.adjust) >= 10:
                     self.adjustWin = Toplevel(self.adminWin)
-                    self.adminWin.resizable(0, 0)
+                    self.adjustWin.resizable(0, 0)
                     self.windowHeight = int(self.adjustWin.winfo_reqheight())
                     self.windowWidth = int(self.adjustWin.winfo_reqwidth())
                     self.positionRight = int(self.adjustWin.winfo_screenwidth() / 2 - (self.windowWidth / 2))
@@ -589,7 +593,7 @@ class AdminWin():
     # EMPLOYEE DATA
     def employeeQuery(self, data):
         try:
-            conn = sqlite3.connect('//Zerozed-pc/shared/DB/ROZERIYA-DB.db')
+            conn = sqlite3.connect(SERVER_PATH)
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM EMPLOYEE ORDER BY EMPLOYEE_ID;")
             query1 = cursor.fetchall()
@@ -614,9 +618,352 @@ class AdminWin():
                 self.check = False
                 return 'NOT FOUND'
 
-        except (Exception, psycopg2.Error) as error:
+        except (Exception, sqlite3.Error) as error:
             self.check = False
             print("Error while connecting to PostgreSQL ", error)
+            messagebox.showerror("Database Error", error)
+
+    def employeeProfile(self):
+        try:
+            self.empProfile = sd.askstring(title='ADJUST EMPLOYEE', prompt=f'ENTER SAME WITH THIS FORMAT exp:{self.emp_id}')
+        except:
+            messagebox.showwarning("CAUTION", "YOU MUST PRESS SHOW EMPLOYEE FIRST")
+
+        try:
+            if self.empProfile in self.check_employeeID:
+                if "RZ" and 'E' in self.empProfile and len(self.empProfile) >= 10:
+                    show = Frame(master=self.adminWin)
+                    show.place(relwidth=0.8, relheight=1, relx=0.2)
+                    frame_image = tk.PhotoImage(master=show, file='images/frameBg.png')
+                    frame_label = Label(show, background='gold', image=frame_image)
+                    frame_label.image = frame_image
+                    frame_label.place(x=0, y=0, relwidth=1, relheight=1)
+                    style = Style()
+                    style.configure('W.TButton', font=('Comic sans ms', 15, 'normal', 'italic'), foreground='black')
+                    style.configure('C.TButton', font=('Comic sans ms', 15, 'normal', 'italic'), foreground='red')
+                    style1 = 'W.TButton'
+                    style2 = 'C.TButton'
+
+                    Label(show, text="EMPLOYEE PROFILE", font=('comic sans ms', 18, 'italic', 'bold')).pack()
+
+                    def employeeQuery(data):
+                        try:
+                            conn = sqlite3.connect(SERVER_PATH)
+                            cursor = conn.cursor()
+                            cursor.execute("SELECT * FROM EMPLOYEE ORDER BY EMPLOYEE_ID;")
+                            query1 = cursor.fetchall()
+                            cursor.execute("SELECT * FROM EMPLOYEE_DATA ORDER BY EMPLOYEE_ID;")
+                            query2 = cursor.fetchall()
+                            product = []
+                            product_data = []
+                            # print("YOU ARE CONNECTED TO DATABASE")    #debug
+                            if data == 'employee':
+                                for i in query1:
+                                    for x in i:
+                                        product.append(str(x))
+                                self.check = True
+                                return product
+                            elif data == 'employee_data':
+                                for y in query2:
+                                    for k in y:
+                                        product_data.append(str(k))
+                                self.check = True
+                                return product_data
+                            else:
+                                self.check = False
+                                return 'NOT FOUND'
+
+                        except (Exception, sqlite3.Error) as error:
+                            self.check = False
+                            print("Error while connecting to Database ", error)
+                            messagebox.showerror("Database Error", error)
+
+                    def getPhoto():
+                        try:
+                            conn = sqlite3.connect(SERVER_PATH)
+                            cursor = conn.cursor()
+                            cursor.execute("SELECT * FROM EMPLOYEE_DATA ORDER BY EMPLOYEE_ID;")
+                            query1 = cursor.fetchall()
+                            employee = []
+                            for i in query1:
+                                for x in i:
+                                    employee.append(str(x))
+                            # print("YOU ARE CONNECTED TO DATABASE")    #debug
+
+                            photoBlob = employee[employee.index(self.empProfile) + 6]
+                            print(photoBlob)
+                            photo = ImageTk.PhotoImage(Image.open(photoBlob))
+                            return photo
+
+                        except (Exception, sqlite3.Error) as error:
+                            self.check = False
+                            print("Error while connecting to database ", error)
+                            messagebox.showerror("Database Error", error)
+
+                    # PHOTO
+
+                    # pathName = "//Zerozed-pc/shared/DB/gambar_pekerja/" + self.empProfile +".jpg"
+                    photo = getPhoto()
+                    self.photoFrame = Label(show, background='white', image=photo)
+                    self.photoFrame.image = photo
+                    self.photoFrame.place(width=200, height=250, relx=0.8)
+
+                    employee = [i.strip(" ") for i in
+                                     employeeQuery(
+                                         'employee_data')]  # EMPLOYEE_ID[0], NAME[1], POS[2], ADDRESS[3], PHONE[4], SALARY[5]
+                    employee_stamp =[i.strip(" ") for i in
+                                     employeeQuery(
+                                         'employee')]
+                    readableDate = time.ctime(float(employee_stamp[employee_stamp.index(self.empProfile) + 3]))
+
+                    # time hire
+                    Label(show, text='START DATE OF WORK: ', font=('arial', 15, 'bold')).place(relx=0, rely=0.1)
+                    dateLabel = Label(show, text=str(readableDate),
+                                      font=('arial', 17, 'bold', 'italic'), background='silver')
+                    dateLabel.place(relx=0.3, rely=0.1)
+
+                    # NAME
+                    Label(show, text='NAME: ', font=('arial', 15, 'bold')).place(relx=0, rely=0.2)
+                    nameLabel = Label(show, text=employee[employee.index(self.empProfile) + 1], font=('comic sans ms', 17, 'bold', 'italic') )
+                    nameLabel.place(relx=0.1, rely = 0.2)
+
+                    # POSITION
+                    Label(show, text='POSITION: ', font=('arial', 15, 'bold')).place(relx=0, rely=0.3)
+                    posLabel = Label(show, text=employee[employee.index(self.empProfile) + 2],
+                                  font=('arial', 15, 'bold'))
+                    posLabel.place(relx=0.12, rely=0.3)
+
+                    # ADDRESS
+                    Label(show, text='ADDRESS: ', font=('arial', 15, 'bold')).place(relx=0, rely=0.4)
+                    addressLabel = Label(show, text=employee[employee.index(self.empProfile) + 3],
+                                     font=('arial', 14, 'bold'))
+                    addressLabel.place(relx=0.12, rely=0.4)
+
+                    # PHONE NUMBER
+                    Label(show, text='PHONE NUM: ', font=('arial', 15, 'bold')).place(relx=0, rely=0.5)
+                    phoneLabel = Label(show, text=employee[employee.index(self.empProfile) + 4],
+                                         font=('arial', 14, 'bold'))
+                    phoneLabel.place(relx=0.15, rely=0.5)
+
+                    # SALARY
+                    Label(show, text='SALARY: ', font=('arial', 15, 'bold')).place(relx=0, rely=0.6)
+                    salaryLabel = Label(show, text='RM ' + str(employee[employee.index(self.empProfile) + 5]),
+                                       font=('arial', 18, 'bold'))
+                    salaryLabel.place(relx=0.12, rely=0.6)
+
+                    # ID
+                    Label(show, text='ID: ', font=('arial', 22, 'bold')).place(relx=0.4, rely=0.7)
+                    salaryLabel = Label(show, text=str(employee[employee.index(self.empProfile)]),
+                                        font=('arial', 22, 'bold'), background='silver', foreground='gold')
+                    salaryLabel.place(relx=0.45, rely=0.7)
+
+                    # back button
+                    backButton = Button(show, text='BACK', style=style1, command=self.showEmployee)
+                    backButton.place(relx=0, rely=0)
+
+                    def promotion():
+                        try:
+                            promote = sd.askstring(title='PROMOTION',
+                                                           prompt=f'WHAT POSITION?')
+                            up_salary = sd.askfloat(title='PROMOTION',
+                                                           prompt=f'HOW MUCH SALARY?')
+                        except:
+                            messagebox.showwarning("CAUTION", "YOU MUST PRESS SHOW EMPLOYEE FIRST")
+
+                        try:
+                            conn = sqlite3.connect(SERVER_PATH)
+                            cursor = conn.cursor()
+                            cursor.execute("""UPDATE EMPLOYEE_DATA
+                                                                                            SET EMPLOYEE_POS = ?,
+                                                                                                    SALARY =?
+                                                                                            WHERE EMPLOYEE_ID = ?""",
+                                           (promote, up_salary , self.empProfile))
+                            conn.commit()
+                            cursor.execute("""UPDATE EMPLOYEE
+                                                                                                                        SET EMPLOYEE_POS = ?.
+                                                                                                                                SALARY = ?
+                                                                                                                        WHERE EMPLOYEE_ID = ?""",
+                                           (promote, up_salary ,self.empProfile))
+                            conn.commit()
+                            messagebox.showinfo("SUCCESSFUL", f"{self.empProfile} PROMOTED TO {promote} WITH SALARY RM {up_salary}")
+                            self.showEmployee()
+                        except (Exception, sqlite3.Error) as error:
+                            self.check = False
+                            print("Error while connecting to database ", error)
+                            messagebox.showerror("Database Error", error)
+
+                    def demotion():
+                        try:
+                            promote = sd.askstring(title='PROMOTION',
+                                                           prompt=f'WHAT POSITION?')
+                            up_salary = sd.askfloat(title='PROMOTION',
+                                                    prompt=f'HOW MUCH SALARY?')
+                        except:
+                            messagebox.showwarning("CAUTION", "YOU MUST PRESS SHOW EMPLOYEE FIRST")
+
+                        try:
+                            conn = sqlite3.connect(SERVER_PATH)
+                            cursor = conn.cursor()
+                            cursor.execute("""UPDATE EMPLOYEE_DATA
+                                                                                                                        SET EMPLOYEE_POS = ?,
+                                                                                                                                SALARY =?
+                                                                                                                        WHERE EMPLOYEE_ID = ?""",
+                                          (promote, up_salary, self.empProfile))
+                            conn.commit()
+                            cursor.execute("""UPDATE EMPLOYEE
+                                                                                                                                                    SET EMPLOYEE_POS = ?.
+                                                                                                                                                            SALARY = ?
+                                                                                                                                                    WHERE EMPLOYEE_ID = ?""",
+                                           (promote, up_salary, self.empProfile))
+                            conn.commit()
+                            messagebox.showwarning("SUCCESSFUL", f"{self.empProfile} DEMOTED TO {promote}")
+                            self.showEmployee()
+                        except (Exception, sqlite3.Error) as error:
+                            self.check = False
+                            print("Error while connecting to database ", error)
+                            messagebox.showerror("Database Error", error)
+
+                    # promotion button
+                    promoteButton = Button(show, text='PROMOTION', style=style1, command=promotion)
+                    promoteButton.place(relx=0.85,rely=0.4)
+
+                    # demotion button
+                    promoteButton = Button(show, text='DEMOTION', style=style1, command=demotion)
+                    promoteButton.place(relx=0.85, rely=0.5)
+
+                    # fired button
+                    promoteButton = Button(show, text='FIRED', style=style2, command=self.deleteEmployee)
+                    promoteButton.place(relx=0.85, rely=0.7)
+
+                    # adjust employee
+                    adjustEmp_button = Button(show, text='ADJUST', style=style1, command=self.adjustEmployee)
+                    adjustEmp_button.place(relx=0.85, rely=0.6)
+
+
+                else:
+                    messagebox.showerror("WRONG ID", "PUT THE CORRECT PRODUCT ID")
+            else:
+                messagebox.showerror("ID NOT EXIST", "PUT ANOTHER ID")
+        except:
+            print("canceled")
+
+    def showEmployee(self):
+        show = Frame(master=self.adminWin)
+        show.place(relwidth=0.8, relheight=1, relx=0.2)
+        frame_image = tk.PhotoImage(master=show, file='images/frameBg.png')
+        frame_label = Label(show, background='gold', image=frame_image)
+        frame_label.image = frame_image
+        frame_label.place(x=0, y=0, relwidth=1, relheight=1)
+        style = Style()
+        style.configure('W.TButton', font=('Comic sans ms', 15, 'normal', 'italic'), foreground='black')
+        style1 = 'W.TButton'
+
+        self.regItem_button.config(state='disabled')
+        self.delItem_button.config(state='disabled')
+        self.adjustStock_button.config(state='disabled')
+
+        Label(show, text="EMPLOYEE DATA", font=('comic sans ms', 18, 'italic', 'bold')).pack()
+
+        # add employee
+        addEmp_button = Button(show, text='add', style=style1, command=self.addEmployee)
+        addEmp_button.place(relx=0, rely=0.05)
+
+        # SHOW PROFILE
+        profileEmp_button = Button(show, text='profile', style=style1, command=self.employeeProfile)
+        profileEmp_button.place(relx=0.2, rely=0.05)
+
+        try:
+            employee = [i.strip(" ") for i in
+                        self.employeeQuery('employee')]  # PRODUCT_ID[0], PRODUCT_TYPE[1], EXIST[2]
+            employee_data = [i.strip(" ") for i in
+                             self.employeeQuery(
+                                 'employee_data')]  # PRODUCT_ID[0], PRODUCT_NAME[1], PRICE[2], QUANTITY[3]
+
+        except:
+            self.check = False
+
+        if self.check:
+            if self.check:
+                self.check_employeeID = []
+                chk = 0
+                for i in employee:
+                    if len(employee) > chk:
+                        self.check_employeeID.append(employee[chk])
+                        chk = chk + 4
+                id_count = 1
+                self.emp_id_count = ''
+                for i in self.check_employeeID:
+                    id_count = id_count + 1
+                if id_count < 10:
+                    self.emp_id = "RZ0000E00" + str(id_count)
+                    self.emp_id_count = str(id_count)
+                elif id_count < 100:
+                    self.emp_id = "RZ0000E0" + str(id_count)
+                    self.emp_id_count = str(id_count)
+                else:
+                    self.emp_id = "RZ0000E" + str(id_count)
+                    self.emp_id_count = str(id_count)
+            self.e_id = []
+            self.pos = []
+            name = []
+            address = []
+            phone = []
+            salary = []
+            # print(employee)   #debug
+            # print(employee_data)  #debug
+            xt = 2
+            xd = 0
+            for i in employee_data:
+                if len(employee_data) > xd:
+                    self.e_id.append(employee_data[xd])
+                    xd = xd + 7
+                if len(employee_data) > xt:
+                    self.pos.append(employee_data[xt])
+                    xt = xt + 7
+
+            yn = 1
+            yp = 3
+            yq = 4
+            yz = 5
+            for i in employee_data:
+                if len(employee_data) > yn:
+                    name.append(employee_data[yn])
+                    yn = yn + 7
+                if len(employee_data) > yp:
+                    address.append(employee_data[yp])
+                    yp = yp + 7
+                if len(employee_data) > yq:
+                    phone.append(employee_data[yq])
+                    yq = yq + 7
+                if len(employee_data) > yz:
+                    salary.append(employee_data[yz])
+                    yz = yz + 7
+
+            # DATA TABLE
+            cols = ('ID', 'NAMA', 'JAWATAN', 'ALAMAT', 'NO.TELEFON', 'GAJI')
+            self.data_table = Treeview(show, columns=cols, show='headings')
+            for col in cols:
+                self.data_table.heading(col, text=col)
+            k = 0
+            for i in range(len(self.e_id)):
+                self.data_table.insert("", END,
+                                       values=(
+                                           self.e_id[k], name[k], self.pos[k], address[k], int(phone[k]),
+                                           'RM ' + str(salary[k])))
+                k = k + 1
+
+            self.data_table.place(relx=0.01, rely=0.1, relwidth=0.98, relheight=0.9)
+            vsb = Scrollbar(show, orient="vertical", command=self.data_table.yview)
+            vsb.place(relx=0.98, rely=0.1, relheight=0.9)
+            hrz = Scrollbar(show, orient="horizontal", command=self.data_table.xview)
+            hrz.place(relx=0, rely=0.98, relwidth=1)
+            self.data_table.configure(yscrollcommand=vsb.set, xscrollcommand=hrz.set)
+
+        else:
+            Label(show, text="""CAN'T CONNECT DATABASE, 
+                       PLEASE PRESS THE BUTTON AGAIN""", font=('comic sans ms', 18, 'italic', 'bold'),
+                  foreground='red').place(
+                relx=0, rely=0.5)
 
     def deleteEmployee(self):
         try:
@@ -636,7 +983,7 @@ class AdminWin():
                 if "RZ" and 'E' in deleteEMP and len(deleteEMP) >= 10:
                     getDel = str(deleteEMP).upper()
                     try:
-                        conn = sqlite3.connect('//Zerozed-pc/shared/DB/ROZERIYA-DB.db')
+                        conn = sqlite3.connect(SERVER_PATH)
                         cursor = conn.cursor()
                         print("YOU ARE CONNECTED TO DATABASE")
                         try:
@@ -695,13 +1042,14 @@ class AdminWin():
                                                                                  filetypes=(
                                                                                      ("jpeg files", "*.jpg"),
                                                                                      ("all files", "*.*")))
+                            self.addEMPWin.focus_force()
                             photo = str(self.addEMPWin.filename)
                             getPhoto.set(photo)
                             foo = Image.open(photo)
                             foo = foo.resize((200, 250), Image.ANTIALIAS)
-                            pathName = "//Zerozed-pc/shared/DB/gambar_pekerja/" + self.addEMP +".jpg"
+                            pathName = EMPLOYEE_PHOTO_PATH + self.addEMP +".jpg"
                             self.getPhotoBlob = pathName
-                            foo.save(pathName, quality=100)
+                            foo.save(os.path.abspath(pathName), quality=100)
 
                         def query_emp():
                             ID = self.addEMP.upper()
@@ -713,11 +1061,10 @@ class AdminWin():
                             d = datetime.now()
                             self.timestamp = d.timestamp()
                             try:
-                                conn = sqlite3.connect(
-                                    '//Zerozed-pc/shared/DB/ROZERIYA-DB.db')  # \\Zerozed-pc\shared\DB
+                                conn = sqlite3.connect(SERVER_PATH)  # \\Zerozed-pc\shared\DB
                                 cursor = conn.cursor()
-                                print("YOU ARE CONNECTED TO DATABASE")
-                                print(ID, NAMA, 'EMPLOYEE', ADDRESS, PHONE, SALARY, getPhoto.get())
+                                # print("YOU ARE CONNECTED TO DATABASE")    #debug
+                                print(ID, NAMA, 'EMPLOYEE', ADDRESS, PHONE, SALARY, getPhoto.get()) #debug
                                 try:
                                     cursor.execute("INSERT INTO EMPLOYEE VALUES(?,?,?,?)",
                                                    (ID, 'EMPLOYEE', True, self.timestamp))
@@ -823,17 +1170,24 @@ class AdminWin():
                         self.getPhotoBlobAdj = ''
 
                         def empPhoto():
-                            self.adjustEMPWin.filename = filedialog.askopenfilename(initialdir="/", title="Select file",
-                                                                                 filetypes=(
-                                                                                     ("jpeg files", "*.jpg"),
-                                                                                     ("all files", "*.*")))
-                            photo = str(self.adjustEMPWin.filename)
-                            getPhoto.set(photo)
-                            foo = Image.open(photo)
-                            foo = foo.resize((200, 250), Image.ANTIALIAS)
-                            pathName = "//Zerozed-pc/shared/DB/gambar_pekerja/"+ self.adjustEMP + ".jpg"
-                            self.getPhotoBlobAdj = pathName
-                            foo.save(pathName, quality=100)
+                            #bug here
+                            try:
+                                self.adjustEMPWin.filename = filedialog.askopenfilename(initialdir="/",
+                                                                                        title="Select file",
+                                                                                        filetypes=(
+                                                                                            ("jpeg files", "*.jpg"),
+                                                                                            ("all files", "*.*")))
+                                self.adjustEMPWin.focus_force()
+                                photo = str(self.adjustEMPWin.filename)
+                                getPhoto.set(photo)
+                                foo = Image.open(photo)
+                                foo = foo.resize((200, 250), Image.ANTIALIAS)
+                                pathName = EMPLOYEE_PHOTO_PATH + self.adjustEMP + ".jpg"
+                                self.getPhotoBlobAdj = pathName
+                                foo.save(os.path.abspath(pathName), quality=100)
+                            except:
+                                print("exited") #debug
+
 
                         def query_emp():
                             ID = self.adjustEMP.upper()
@@ -846,10 +1200,10 @@ class AdminWin():
                             self.timestamp = d.timestamp()
                             try:
                                 conn = sqlite3.connect(
-                                    '//Zerozed-pc/shared/DB/ROZERIYA-DB.db')  # \\Zerozed-pc\shared\DB
+                                    SERVER_PATH)  # \\Zerozed-pc\shared\DB
                                 cursor = conn.cursor()
-                                print("YOU ARE CONNECTED TO DATABASE")
-                                print(ID, NAMA, 'EMPLOYEE', ADDRESS, PHONE, SALARY, getPhoto.get())
+                                # print("YOU ARE CONNECTED TO DATABASE")    #debug
+                                # print(ID, NAMA, 'EMPLOYEE', ADDRESS, PHONE, SALARY, getPhoto.get())   #debug
                                 try:
                                     if self.adjustEmpRead.get() == 'all':
                                         cursor.execute("""UPDATE EMPLOYEE_DATA
@@ -1015,339 +1369,8 @@ class AdminWin():
         except:
             print("CANCELED")
 
-    def employeeProfile(self):
-        try:
-            self.empProfile = sd.askstring(title='ADJUST EMPLOYEE', prompt=f'ENTER SAME WITH THIS FORMAT exp:{self.emp_id}')
-        except:
-            messagebox.showwarning("CAUTION", "YOU MUST PRESS SHOW EMPLOYEE FIRST")
 
-        try:
-            if self.empProfile in self.check_employeeID:
-                if "RZ" and 'E' in self.empProfile and len(self.empProfile) >= 10:
-                    show = Frame(master=self.adminWin)
-                    show.place(relwidth=0.8, relheight=1, relx=0.2)
-                    frame_image = tk.PhotoImage(master=show, file='images/frameBg.png')
-                    frame_label = Label(show, background='gold', image=frame_image)
-                    frame_label.image = frame_image
-                    frame_label.place(x=0, y=0, relwidth=1, relheight=1)
-                    style = Style()
-                    style.configure('W.TButton', font=('Comic sans ms', 15, 'normal', 'italic'), foreground='black')
-                    style.configure('C.TButton', font=('Comic sans ms', 15, 'normal', 'italic'), foreground='red')
-                    style1 = 'W.TButton'
-                    style2 = 'C.TButton'
+#TODO try using ADJUST_FLOW AND ADJUST_CACHE
+#TODO REGISTER_CACHE for new product will be used
 
-                    Label(show, text="EMPLOYEE PROFILE", font=('comic sans ms', 18, 'italic', 'bold')).pack()
-
-                    def employeeQuery(data):
-                        try:
-                            conn = sqlite3.connect('//Zerozed-pc/shared/DB/ROZERIYA-DB.db')
-                            cursor = conn.cursor()
-                            cursor.execute("SELECT * FROM EMPLOYEE ORDER BY EMPLOYEE_ID;")
-                            query1 = cursor.fetchall()
-                            cursor.execute("SELECT * FROM EMPLOYEE_DATA ORDER BY EMPLOYEE_ID;")
-                            query2 = cursor.fetchall()
-                            product = []
-                            product_data = []
-                            print("YOU ARE CONNECTED TO DATABASE")
-                            if data == 'employee':
-                                for i in query1:
-                                    for x in i:
-                                        product.append(str(x))
-                                self.check = True
-                                return product
-                            elif data == 'employee_data':
-                                for y in query2:
-                                    for k in y:
-                                        product_data.append(str(k))
-                                self.check = True
-                                return product_data
-                            else:
-                                self.check = False
-                                return 'NOT FOUND'
-
-                        except (Exception, sqlite3.Error) as error:
-                            self.check = False
-                            print("Error while connecting to Database ", error)
-
-                    def getPhoto():
-                        try:
-                            conn = sqlite3.connect('//Zerozed-pc/shared/DB/ROZERIYA-DB.db')
-                            cursor = conn.cursor()
-                            cursor.execute("SELECT * FROM EMPLOYEE_DATA ORDER BY EMPLOYEE_ID;")
-                            query1 = cursor.fetchall()
-                            employee = []
-                            for i in query1:
-                                for x in i:
-                                    employee.append(str(x))
-                            print("YOU ARE CONNECTED TO DATABASE")
-
-                            photoBlob = employee[employee.index(self.empProfile) + 6]
-                            print(photoBlob)
-                            photo = ImageTk.PhotoImage(Image.open(photoBlob))
-                            return photo
-
-                        except (Exception, sqlite3.Error) as error:
-                            self.check = False
-                            print("Error while connecting to database ", error)
-
-                    # PHOTO
-
-                    # pathName = "//Zerozed-pc/shared/DB/gambar_pekerja/" + self.empProfile +".jpg"
-                    photo = getPhoto()
-                    self.photoFrame = Label(show, background='white', image=photo)
-                    self.photoFrame.image = photo
-                    self.photoFrame.place(width=200, height=250, relx=0.8)
-
-                    employee = [i.strip(" ") for i in
-                                     employeeQuery(
-                                         'employee_data')]  # EMPLOYEE_ID[0], NAME[1], POS[2], ADDRESS[3], PHONE[4], SALARY[5]
-                    employee_stamp =[i.strip(" ") for i in
-                                     employeeQuery(
-                                         'employee')]
-                    readableDate = time.ctime(float(employee_stamp[employee_stamp.index(self.empProfile) + 3]))
-
-                    # time hire
-                    Label(show, text='START DATE OF WORK: ', font=('arial', 15, 'bold')).place(relx=0, rely=0.1)
-                    dateLabel = Label(show, text=str(readableDate),
-                                      font=('arial', 17, 'bold', 'italic'), background='silver')
-                    dateLabel.place(relx=0.3, rely=0.1)
-
-                    # NAME
-                    Label(show, text='NAME: ', font=('arial', 15, 'bold')).place(relx=0, rely=0.2)
-                    nameLabel = Label(show, text=employee[employee.index(self.empProfile) + 1], font=('comic sans ms', 17, 'bold', 'italic') )
-                    nameLabel.place(relx=0.1, rely = 0.2)
-
-                    # POSITION
-                    Label(show, text='POSITION: ', font=('arial', 15, 'bold')).place(relx=0, rely=0.3)
-                    posLabel = Label(show, text=employee[employee.index(self.empProfile) + 2],
-                                  font=('arial', 15, 'bold'))
-                    posLabel.place(relx=0.12, rely=0.3)
-
-                    # ADDRESS
-                    Label(show, text='ADDRESS: ', font=('arial', 15, 'bold')).place(relx=0, rely=0.4)
-                    addressLabel = Label(show, text=employee[employee.index(self.empProfile) + 3],
-                                     font=('arial', 14, 'bold'))
-                    addressLabel.place(relx=0.12, rely=0.4)
-
-                    # PHONE NUMBER
-                    Label(show, text='PHONE NUM: ', font=('arial', 15, 'bold')).place(relx=0, rely=0.5)
-                    phoneLabel = Label(show, text=employee[employee.index(self.empProfile) + 4],
-                                         font=('arial', 14, 'bold'))
-                    phoneLabel.place(relx=0.15, rely=0.5)
-
-                    # SALARY
-                    Label(show, text='SALARY: ', font=('arial', 15, 'bold')).place(relx=0, rely=0.6)
-                    salaryLabel = Label(show, text='RM ' + str(employee[employee.index(self.empProfile) + 5]),
-                                       font=('arial', 18, 'bold'))
-                    salaryLabel.place(relx=0.12, rely=0.6)
-
-                    # ID
-                    Label(show, text='ID: ', font=('arial', 22, 'bold')).place(relx=0.4, rely=0.7)
-                    salaryLabel = Label(show, text=str(employee[employee.index(self.empProfile)]),
-                                        font=('arial', 22, 'bold'), background='silver', foreground='gold')
-                    salaryLabel.place(relx=0.45, rely=0.7)
-
-                    # back button
-                    backButton = Button(show, text='BACK', style=style1, command=self.showEmployee)
-                    backButton.place(relx=0, rely=0)
-
-                    def promotion():
-                        try:
-                            promote = sd.askstring(title='PROMOTION',
-                                                           prompt=f'WHAT POSITION?')
-                        except:
-                            messagebox.showwarning("CAUTION", "YOU MUST PRESS SHOW EMPLOYEE FIRST")
-
-                        try:
-                            conn = sqlite3.connect('//Zerozed-pc/shared/DB/ROZERIYA-DB.db')
-                            cursor = conn.cursor()
-                            cursor.execute("""UPDATE EMPLOYEE_DATA
-                                                                                            SET EMPLOYEE_POS = ?
-                                                                                            WHERE EMPLOYEE_ID = ?""",
-                                           (promote , self.empProfile))
-                            conn.commit()
-                            cursor.execute("""UPDATE EMPLOYEE
-                                                                                                                        SET EMPLOYEE_POS = ?
-                                                                                                                        WHERE EMPLOYEE_ID = ?""",
-                                           (promote, self.empProfile))
-                            conn.commit()
-                            messagebox.showinfo("SUCCESSFUL", f"{self.empProfile} PROMOTED TO {promote}")
-                            self.showEmployee()
-                        except (Exception, sqlite3.Error) as error:
-                            self.check = False
-                            print("Error while connecting to database ", error)
-
-                    def demotion():
-                        try:
-                            promote = sd.askstring(title='PROMOTION',
-                                                           prompt=f'WHAT POSITION?')
-                        except:
-                            messagebox.showwarning("CAUTION", "YOU MUST PRESS SHOW EMPLOYEE FIRST")
-
-                        try:
-                            conn = sqlite3.connect('//Zerozed-pc/shared/DB/ROZERIYA-DB.db')
-                            cursor = conn.cursor()
-                            cursor.execute("""UPDATE EMPLOYEE_DATA
-                                                                                            SET EMPLOYEE_POS = ?
-                                                                                            WHERE EMPLOYEE_ID = ?""",
-                                           (promote , self.empProfile))
-                            conn.commit()
-                            cursor.execute("""UPDATE EMPLOYEE
-                                                                                                                        SET EMPLOYEE_POS = ?
-                                                                                                                        WHERE EMPLOYEE_ID = ?""",
-                                           (promote, self.empProfile))
-                            conn.commit()
-                            messagebox.showwarning("SUCCESSFUL", f"{self.empProfile} DEMOTED TO {promote}")
-                            self.showEmployee()
-                        except (Exception, sqlite3.Error) as error:
-                            self.check = False
-                            print("Error while connecting to database ", error)
-                    # promotion button
-                    promoteButton = Button(show, text='PROMOTION', style=style1, command=promotion)
-                    promoteButton.place(relx=0.85,rely=0.4)
-
-                    # demotion button
-                    promoteButton = Button(show, text='DEMOTION', style=style1, command=demotion)
-                    promoteButton.place(relx=0.85, rely=0.5)
-
-                    # fired button
-                    promoteButton = Button(show, text='FIRED', style=style2, command=self.deleteEmployee)
-                    promoteButton.place(relx=0.85, rely=0.7)
-
-                    # adjust employee
-                    adjustEmp_button = Button(show, text='ADJUST', style=style1, command=self.adjustEmployee)
-                    adjustEmp_button.place(relx=0.85, rely=0.6)
-
-
-                else:
-                    messagebox.showerror("WRONG ID", "PUT THE CORRECT PRODUCT ID")
-            else:
-                messagebox.showerror("ID NOT EXIST", "PUT ANOTHER ID")
-        except:
-            print("canceled")
-
-    def showEmployee(self):
-        show = Frame(master=self.adminWin)
-        show.place(relwidth=0.8, relheight=1, relx=0.2)
-        frame_image = tk.PhotoImage(master=show, file='images/frameBg.png')
-        frame_label = Label(show, background='gold', image=frame_image)
-        frame_label.image = frame_image
-        frame_label.place(x=0, y=0, relwidth=1, relheight=1)
-        style = Style()
-        style.configure('W.TButton', font=('Comic sans ms', 15, 'normal', 'italic'), foreground='black')
-        style1 = 'W.TButton'
-
-        self.regItem_button.config(state='disabled')
-        self.delItem_button.config(state='disabled')
-        self.adjustStock_button.config(state='disabled')
-
-        Label(show, text="EMPLOYEE DATA", font=('comic sans ms', 18, 'italic', 'bold')).pack()
-
-        # add employee
-        addEmp_button = Button(show, text='add', style=style1, command=self.addEmployee)
-        addEmp_button.place(relx=0, rely=0.05)
-
-        # SHOW PROFILE
-        profileEmp_button = Button(show, text='profile', style=style1, command=self.employeeProfile)
-        profileEmp_button.place(relx=0.2, rely=0.05)
-
-        try:
-            employee = [i.strip(" ") for i in
-                        self.employeeQuery('employee')]  # PRODUCT_ID[0], PRODUCT_TYPE[1], EXIST[2]
-            employee_data = [i.strip(" ") for i in
-                             self.employeeQuery(
-                                 'employee_data')]  # PRODUCT_ID[0], PRODUCT_NAME[1], PRICE[2], QUANTITY[3]
-
-        except:
-            self.check = False
-
-        if self.check:
-            if self.check:
-                self.check_employeeID = []
-                chk = 0
-                for i in employee:
-                    if len(employee) > chk:
-                        self.check_employeeID.append(employee[chk])
-                        chk = chk + 4
-                id_count = 1
-                self.emp_id_count = ''
-                for i in self.check_employeeID:
-                    id_count = id_count + 1
-                if id_count < 10:
-                    self.emp_id = "RZ0000E00" + str(id_count)
-                    self.emp_id_count = str(id_count)
-                elif id_count < 100:
-                    self.emp_id = "RZ0000E0" + str(id_count)
-                    self.emp_id_count = str(id_count)
-                else:
-                    self.emp_id = "RZ0000E" + str(id_count)
-                    self.emp_id_count = str(id_count)
-            self.e_id = []
-            self.pos = []
-            name = []
-            address = []
-            phone = []
-            salary = []
-            print(employee)
-            print(employee_data)
-            xt = 2
-            xd = 0
-            for i in employee_data:
-                if len(employee_data) > xd:
-                    self.e_id.append(employee_data[xd])
-                    xd = xd + 7
-                if len(employee_data) > xt:
-                    self.pos.append(employee_data[xt])
-                    xt = xt + 7
-
-            yn = 1
-            yp = 3
-            yq = 4
-            yz = 5
-            for i in employee_data:
-                if len(employee_data) > yn:
-                    name.append(employee_data[yn])
-                    yn = yn + 7
-                if len(employee_data) > yp:
-                    address.append(employee_data[yp])
-                    yp = yp + 7
-                if len(employee_data) > yq:
-                    phone.append(employee_data[yq])
-                    yq = yq + 7
-                if len(employee_data) > yz:
-                    salary.append(employee_data[yz])
-                    yz = yz + 7
-
-            # DATA TABLE
-            cols = ('ID', 'NAMA', 'JAWATAN', 'ALAMAT', 'NO.TELEFON', 'GAJI')
-            self.data_table = Treeview(show, columns=cols, show='headings')
-            for col in cols:
-                self.data_table.heading(col, text=col)
-            k = 0
-            for i in range(len(self.e_id)):
-                self.data_table.insert("", END,
-                                       values=(
-                                           self.e_id[k], name[k], self.pos[k], address[k], int(phone[k]),
-                                           'RM ' + str(salary[k])))
-                k = k + 1
-
-            self.data_table.place(relx=0.01, rely=0.1, relwidth=0.98, relheight=0.9)
-            vsb = Scrollbar(show, orient="vertical", command=self.data_table.yview)
-            vsb.place(relx=0.98, rely=0.1, relheight=0.9)
-            hrz = Scrollbar(show, orient="horizontal", command=self.data_table.xview)
-            hrz.place(relx=0, rely=0.98, relwidth=1)
-            self.data_table.configure(yscrollcommand=vsb.set, xscrollcommand=hrz.set)
-
-        else:
-            Label(show, text="""CAN'T CONNECT DATABASE, 
-                       PLEASE PRESS THE BUTTON AGAIN""", font=('comic sans ms', 18, 'italic', 'bold'),
-                  foreground='red').place(
-                relx=0, rely=0.5)
-
-
-
-
-
-
-
-# AdminWin(master=Tk(), ID='TEST1234', POS='MIOW').adminWin
+# AdminWin(master=Tk(), ID='TEST1234', POS='MANAGER')   #test debug for admin_page.py

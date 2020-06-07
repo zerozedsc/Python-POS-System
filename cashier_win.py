@@ -1,15 +1,24 @@
 import errno
+import os
+import shutil
 import sqlite3
+import time
 import tkinter as tk
 import tkinter.simpledialog as sd
-from datetime import datetime
+from datetime import datetime, date, timedelta
+from sys import exit
 from tkinter import *
 from tkinter import messagebox
 from tkinter.ttk import *
 from tkinter.ttk import Style
-import os
-from sys import exit
-import time
+import tkcalendar
+from pprint import pprint
+import openpyxl as pyxl
+import xlrd
+from openpyxl.styles import Alignment
+
+
+# server
 from server import SERVER_PATH as PATH
 
 
@@ -17,7 +26,7 @@ class CashierWin():
     def __init__(self, master, ID=''):
         self.cashWin = master
         self.cashWin.resizable(0, 0)
-        self.cashWin.protocol("WM_DELETE_WINDOW", exit)
+        self.cashWin.protocol("WM_DELETE_WINDOW", False)
         self.windowHeight = int(self.cashWin.winfo_reqheight())
         self.windowWidth = int(self.cashWin.winfo_reqwidth())
         self.positionRight = int(self.cashWin.winfo_screenwidth() / 2 - (self.windowWidth / 2))
@@ -35,16 +44,19 @@ class CashierWin():
         self.n = 0
         self.k = 0
         self.p = 0
+        self.d = 0
         self.dbPath = PATH
         self.totalMoney = 0
         self.totalBuy = 0
         self.printIntro = True
         self.buy = []
         self.counting = True
+        self.cache_code2 = []
         self.memberDeal = []
         self.calcChoice = True
         self.dealDiscount = 0
         self.memberDiscount = 0
+        self.showDiscount = 0
 
         # Cashier Name
         def name():
@@ -108,6 +120,7 @@ class CashierWin():
                 self.ID_entry.config(state='normal')
                 self.cancelButton.config(state='disabled')
                 messagebox.showerror("ERROR", "PRODUCT ID NOT FOUND OR ENTRY EMPTY")
+                self.ID_entry.focus_force()
 
         # background
         background_image = tk.PhotoImage(master=self.cashWin, file='images/cashierbg.png')
@@ -136,7 +149,11 @@ class CashierWin():
 
         # back button
         self.backButton = Button(self.cashWin, text='BACK', style=style1, command=self.backChoice)
-        self.backButton.place(relx=0.9, rely=0)
+        self.backButton.place(relx=0.84, rely=0, relwidth=0.08)
+
+        # exit button
+        self.exitButton = Button(self.cashWin, text='EXIT', style=style1, command=self.exitWindow)
+        self.exitButton.place(relx=0.92, rely=0, relwidth=0.08)
 
         # total button
         self.totalButton = Button(self.cashWin, text='TOTAL', style=style1, command=self.payWindow)
@@ -146,6 +163,14 @@ class CashierWin():
         self.cancelSaleButton = Button(self.cashWin, text='SALE CANCEL', style=style1, command=self.saleCancel)
         self.cancelSaleButton.place(relx=0.5, rely=0.85)
 
+        # print report button
+        self.printReportButton = Button(self.cashWin, text='REPORT', style=style1, command=self.printExcel)
+        self.printReportButton.place(relx=0.5, rely=0.65)
+
+        # add stock button
+        self.printReportButton = Button(self.cashWin, text='ADD STOCK', style=style1, command=self.addStockWindow)
+        self.printReportButton.place(relx=0.5, rely=0.45)
+
         # Intro
         self.scrollbar = Scrollbar(self.cashWin)
         # self.scrollbar.place(relx=0.8, rely=0.5, height=400)
@@ -154,26 +179,29 @@ class CashierWin():
         self.outputArea.place(relx=0.6, rely=0.2, relwidth=0.4, relheight=0.15)
 
         # Treeview buy
-        cols = ('ID', 'PRODUK', 'QTY', 'HARGA(RM)', 'TOTAL(RM)')
+        cols = ('ID', 'PRODUK', 'QTY', 'HARGA', 'TOTAL', 'OFF')
         self.buyScreen = Treeview(self.cashWin, columns=cols, show='headings')
         i = 0
         for col in cols:
             i = i + 1
             if i == 1:
                 self.buyScreen.heading(col, text=col, )
-                self.buyScreen.column(col, minwidth=0, width=140, stretch=False)
+                self.buyScreen.column(col, minwidth=0, width=130, stretch=False)
             elif i == 2:
                 self.buyScreen.heading(col, text=col, )
-                self.buyScreen.column(col, minwidth=0, width=225, stretch=False)
+                self.buyScreen.column(col, minwidth=0, width=210, stretch=False)
             elif i == 3:
                 self.buyScreen.heading(col, text=col, )
-                self.buyScreen.column(col, minwidth=0, width=45, stretch=False)
+                self.buyScreen.column(col, minwidth=0, width=35, stretch=False)
             elif i == 4:
                 self.buyScreen.heading(col, text=col, )
-                self.buyScreen.column(col, minwidth=0, width=75, stretch=False)
+                self.buyScreen.column(col, minwidth=0, width=65, stretch=False)
             elif i == 5:
                 self.buyScreen.heading(col, text=col, )
-                self.buyScreen.column(col, minwidth=0, width=75, stretch=False)
+                self.buyScreen.column(col, minwidth=0, width=65, stretch=False)
+            elif i == 6:
+                self.buyScreen.heading(col, text=col, )
+                self.buyScreen.column(col, minwidth=0, width=65, stretch=False)
 
         # insert to buy
 
@@ -242,12 +270,6 @@ class CashierWin():
                                   state='normal')
         self.member_entry.place(relx=0, rely=0.82, height=30, width=180)
 
-        # self.getDealID = StringVar()
-        # Label(self.cashWin, text="DEAL OR DISCOUNT ID", font=('arial', 15, 'bold')).place(relx=0.2, rely=0.78)
-        # self.deal_entry = Entry(self.cashWin, textvariable=self.getDealID, font=('comic sans ms', 12, 'bold'),
-        #                         state='normal')
-        # self.deal_entry.place(relx=0.2, rely=0.82, height=30, width=180)
-
         def c(*args):
             if self.getMemberID.get() != '' and len(self.memberDeal) != 1:
                 self.memberDeal.append(self.getMemberID.get())
@@ -256,27 +278,28 @@ class CashierWin():
             else:
                 messagebox.showwarning("EMPTY", "EMPTY ENTRY OR MEMBER ID EXIST")
 
-        def d(*args):
-            if self.getDealID.get() != '' and len(self.memberDeal) != 2:
-                if len(self.memberDeal) == 0:
-                    self.memberDeal.append(" ")
-                self.memberDeal.append(self.getDealID.get())
-                self.deal_entry.delete(0, END)
-                messagebox.showinfo("SUCESS", "DEAL ID ENTERED")
-            else:
-                messagebox.showwarning("EMPTY", "EMPTY ENTRY")
+
 
         self.member_entry.bind("<Return>", c)
-        # self.deal_entry.bind("<Return>", d)
+
 
         self.cashWin.mainloop()
 
-    # resit
+    # receipt
     def receiptIntro(self):
-        filename = "//Zerozed-pc/shared/DB/temp/resit.txt"
-        if not os.path.exists(os.path.dirname(filename)):
+        dirname = "data/Receipt Data/" + str(date.today())  # "//Zerozed-pc/shared/DB/temp/resit.txt"
+        try:
+            # Create target Directory
+            os.mkdir(dirname)
+            print("Directory ", dirname, " Created ")  # debug check directory created
+        except FileExistsError:
+            # print("Directory ", dirname, " already exists")     #debug check dir exists
+            pass
+
+        self.filename = dirname + "/" + str(self.n + 1) + ".txt"  # "//Zerozed-pc/shared/DB/temp/resit.txt"
+        if not os.path.exists(os.path.dirname(self.filename)):
             try:
-                os.makedirs(os.path.dirname(filename))
+                os.makedirs(os.path.dirname(self.filename))
             except OSError as exc:  # Guard against race condition
                 if exc.errno != errno.EEXIST:
                     raise
@@ -285,7 +308,7 @@ class CashierWin():
             self.n = self.n + 1
             self.p = self.p + 1
         self.outputArea.config(state='normal', yscrollcommand=self.scrollbar.set)
-        conn = sqlite3.connect('//Zerozed-pc/shared/DB/ROZERIYA-DB.db')
+        conn = sqlite3.connect(PATH)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM EMPLOYEE_DATA ORDER BY EMPLOYEE_ID;")
         query1 = cursor.fetchall()
@@ -348,7 +371,7 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
             self.outputArea.insert(INSERT, resitComp)
             self.outputArea.config(state='disabled', yscrollcommand=self.scrollbar.set)
             self.introGet = self.outputArea.get(1.0, END)
-            with open(filename, "w") as f:
+            with open(self.filename, "w") as f:
                 f.write(self.introGet)
                 f.close()
 
@@ -358,6 +381,7 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
 
     # total SEND
     def payWindow(self):
+
         def paying():
             try:
                 for i in self.buyScreen.get_children():
@@ -387,7 +411,7 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
                     payFrame_bg.place(x=0, y=0, relwidth=1, relheight=1)
 
                     def cash():
-                        filename = "//Zerozed-pc/shared/DB/temp/resit.txt"
+                        filename = self.filename  # "//Zerozed-pc/shared/DB/temp/resit.txt"
                         if not os.path.exists(os.path.dirname(filename)):
                             try:
                                 os.makedirs(os.path.dirname(filename))
@@ -417,6 +441,10 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
                                     f.close()
                                 self.totalCmd()
                                 self.payWin.destroy()
+                                self.saveExcel()  # save at excel
+                                self.cache_code2 = []
+                                self.d = 0
+                                self.fix_count = 0
                                 self.totalMoney = self.totalMoney + self.actualTotal
                                 Label(self.cashWin, text="TOTAL TODAY: RM" + str(self.totalMoney),
                                       font=('comic sans ms', 15, 'bold')).place(
@@ -424,7 +452,6 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
                             else:
                                 messagebox.showwarning("less cash", "cash is not enough")
                                 self.payWin.lift(aboveThis=self.cashWin)
-
 
                         self.payCash_entry.bind("<Return>", a)
 
@@ -488,25 +515,10 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
                     #     if self.memberDeal != 2:
                     #         self.memberDeal.append("")
 
-                print(self.memberDeal)
-                def useDeals():
-                    from data.callDB import callDB
-                    db = callDB()
-                    db.cursor.execute(f"SELECT * FROM DEAL")
-                    db.conn.commit()
-                    rawValue = db.cursor.fetchall()
-                    c = 0
-                    getV = []
-                    for p in rawValue:
-                        for i in p:
-                            getV.append(i)
-                            if len(getV) > c:
-                                self.deals(id=getV[c])
-                                print(getV[c])
-                                c=c+3
-
-                useDeals()
+                # print(self.memberDeal)    #debug
+                self.fixBuyScreen()
                 paying()
+
 
             else:
                 messagebox.showwarning("SALE INPUT", "NO SALE INPUT TO TOTAL Else")
@@ -518,7 +530,7 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
         def printResult():
             result = messagebox.askquestion("RECEIPT", "Print The Receipt?", icon='info')
             if result == 'yes':
-                print("sent to the printer")
+                # print("sent to the printer")  #debug
                 self.outputArea.config(state='normal')
                 self.outputArea.delete(1.0, END)
                 self.outputArea.config(state='disabled', yscrollcommand=self.scrollbar.set)
@@ -527,9 +539,13 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
                 self.totalPrice.config(state='disabled', yscrollcommand=self.scrollbarPrice.set)
                 for i in self.buyScreen.get_children():
                     self.buyScreen.delete(i)
-                os.startfile(r"\\Zerozed-pc\shared\DB\temp\resit.txt", 'print')
+                printfile = os.path.abspath(self.filename)
+                try:
+                    os.startfile(rf"{printfile}", 'print')
+                except Exception as error:
+                    messagebox.showerror("Printer error", error)
             else:
-                print("not sent to the printer")
+                # print("not sent to the printer")    #debug not sent to the Printer
                 self.outputArea.config(state='normal')
                 self.outputArea.delete(1.0, END)
                 self.outputArea.config(state='disabled', yscrollcommand=self.scrollbar.set)
@@ -551,23 +567,25 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
 
     # insert, cancel and calc config
     def insertBuy(self, *args):
+        self.showDiscount = 0
         try:
             if self.printIntro is True:
                 self.receiptIntro()
                 self.printIntro = False
             if self.getPrdQty.get() != 0 and self.getPrdID != '':
-                print("PRODUCT INSERT")
+                # print("PRODUCT INSERT")   #debug check product insert
                 self.ID_entry.focus_set()
                 priceRound = round(float(self.getPrdPrice.get()), 2)
                 self.calc = self.getPrdQty.get() * round(self.getPrdPrice.get(), 2)
+                self.deals()
                 self.buyScreen.insert("", END,
                                       values=(
-                                          self.getPrdID.get(), self.productName, str(self.getPrdQty.get()),
+                                          self.getPrdID.get(), self.productName, int(self.getPrdQty.get()),
                                           str(priceRound),
-                                          str(round(self.calc, 2))))
+                                          str(round(self.calc, 2)), self.showDiscount))
                 self.buy.append(str(self.getPrdID.get()))
                 self.buy.append(str(self.getPrdQty.get()))
-                filename = "//Zerozed-pc/shared/DB/temp/resit.txt"
+                filename = self.filename
                 if not os.path.exists(os.path.dirname(filename)):
                     try:
                         os.makedirs(os.path.dirname(filename))
@@ -588,13 +606,14 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
                 self.cancel()
 
             else:
-                print("blank")
+                print(" ")  # debug blank
 
-        except:
+        except Exception as e:
             messagebox.showerror("WRONG INPUT", "TRY AGAIN")
+            print(e)
 
     def totalCalc(self, *args):
-        filename = "//Zerozed-pc/shared/DB/temp/resit.txt"
+        filename = self.filename
         if not os.path.exists(os.path.dirname(filename)):
             try:
                 os.makedirs(os.path.dirname(filename))
@@ -628,14 +647,13 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
         # self.totalPrice.insert(INSERT, f"MEMBER ID:{self.memberCard()}\n")
         self.totalPrice.config(state='disabled', yscrollcommand=self.scrollbarPrice.set)
 
-
         self.dealDiscount = 0
 
     def updateDb(self, *args):
         n = 0
         p = 1
         from data.callDB import callDB
-        print(self.buy)
+        # print(self.buy)   #debug
         for i in range(0, len(self.buy)):
             if len(self.buy) > n:
                 db = callDB()
@@ -652,6 +670,8 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
     def saleCancel(self):
         self.ID_entry.focus_set()
         self.counting = False
+        self.fix_count = 0
+        self.cache_code2 = []
         try:
             for i in self.buyScreen.get_children():
                 self.buyScreen.delete(i)
@@ -669,6 +689,108 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
         except:
             messagebox.showwarning("SALE INPUT", "NO SALE INPUT TO DELETE")
 
+    def addStockWindow(self):
+        conn = sqlite3.connect(PATH)  # \\Zerozed-pc\shared\DB
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM PRODUCT_DATA ORDER BY PRODUCT_ID;")
+        query = cursor.fetchall()
+        # pprint(query) #debug
+
+        try:
+            self.adjust = sd.askstring('REGISTER ITEM', f'PRODUCT ID ')
+
+
+            for i in query:
+                if self.adjust.upper() in i:
+                    check_productID = self.adjust.upper()
+                    break
+
+            if self.adjust.upper() in check_productID:
+                if "RZ" and 'P' in self.adjust.upper() or len(self.adjust) >= 10:
+                    self.addWin = Toplevel(self.cashWin)
+                    self.addWin.resizable(0, 0)
+                    self.windowHeight = int(self.addWin.winfo_reqheight())
+                    self.windowWidth = int(self.addWin.winfo_reqwidth())
+                    self.positionRight = int(self.addWin.winfo_screenwidth() / 2 - (self.windowWidth / 2))
+                    self.positionDown = int(self.addWin.winfo_screenheight() / 2 - (self.windowHeight / 2))
+                    self.addWin.iconphoto(False, PhotoImage(file='images/rozeriya.png'))
+                    self.addWin.geometry(f"400x200+{self.positionRight - 400}+{self.positionDown - 300}")
+                    self.addWin.title("ADD ITEM")
+
+                    Label(self.addWin, text="REGISTER ITEM", font=('comic sans ms', 18, 'italic', 'bold')).pack()
+
+
+                    self.getQtyA = IntVar()
+                    qty_before = 0
+
+                    # ID DISABLED
+                    Label(self.addWin, text='PRODUCT ID', font=('Comic sans ms', 12, 'normal', 'italic')).place(
+                        relx=0,
+                        rely=0.2)
+                    reg_entry = Label(self.addWin, font=('Comic sans ms', 12, 'normal', 'italic'),
+                                      text=self.adjust)
+                    reg_entry.place(relx=0.38, rely=0.2, width=240)
+
+                    # NAME
+                    Label(self.addWin, text='PRODUCT NAME',
+                          font=('Comic sans ms', 12, 'normal', 'italic')).place(relx=0, rely=0.35)
+                    self.name_entry = Entry(self.addWin, state='disabled')
+
+                    for k in query:
+                        if self.adjust.upper() in k:
+                            self.name_entry.config(state='normal')
+                            self.name_entry.insert(0, k[1])
+                            qty_before = int(k[4])
+                            Label(self.addWin, text=f'QUANTITY NOW: {qty_before}',
+                                  font=('Comic sans ms', 12, 'normal', 'italic')).place(relx=0, rely=0.48)
+                            self.name_entry.config(state='disabled')
+                            break
+                    self.name_entry.place(relx=0.38, rely=0.35, width=240)
+
+                    # QUANTITY
+                    Label(self.addWin, text='ADD STOCK',
+                          font=('Comic sans ms', 12, 'normal', 'italic')).place(relx=0, rely=0.6)
+                    self.qty_entry = Entry(self.addWin, textvariable=self.getQtyA)
+                    self.qty_entry.place(relx=0.38, rely=0.6, width=240)
+
+                    def query_update():
+                        ID = self.adjust.upper()
+
+                        if str(self.getQtyA.get()).isdigit():
+                            STOCK = qty_before + int(self.getQtyA.get())
+                        else:
+                            STOCK = qty_before
+                            messagebox.showerror("Number Only", "Number only except")
+
+                        try:
+                            cursor.execute("""UPDATE PRODUCT_DATA
+                                                                                                                            SET QUANTITY = ?
+                                                                                                                           WHERE 
+                                                                                                                                   PRODUCT_ID = ?""",
+                                       (STOCK, ID))
+                            conn.commit()
+                            messagebox.showinfo("SUCCESS", f"ADD INTO {ID} DONE")
+                            self.addWin.destroy()
+
+
+                        except (Exception, sqlite3.Error) as error:
+                            messagebox.showerror("FAILED", f"error: {error}")
+                            self.addWin.destroy()
+
+                    # add button
+                    self.all_button = Button(self.addWin, text='ADD', command=query_update)
+                    self.all_button.place(relx=0.5, rely=0.7)
+                    self.ID_entry.focus_force()
+
+                else:
+                    messagebox.showerror("WRONG ID", "PUT THE CORRECT PRODUCT ID")
+
+            else:
+                messagebox.showerror("WRONG ID", "ID NOT FOUND")
+
+        except Exception as e:
+            messagebox.showwarning("ERROR", f"error: {e}")
+
     # data manipulate config
     def memberCard(self, *args, id=''):
         if id == '':
@@ -681,7 +803,8 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
                     db.cursor.execute(f"SELECT * FROM MEMBER WHERE MEMBER_ID = '{id}'")
                     db.conn.commit()
                     rawValue = db.cursor.fetchone()
-                    print(rawValue)
+
+                    # print(rawValue)   #debug Search rawValue
 
                     # 3 types of members Premium, Gold, Bronze
                     # premium discount -
@@ -689,7 +812,7 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
                     # bronze discount -
 
                     def Premium():
-                        print("premium member")
+                        print("premium member")  # debug
 
                         rawItem = []
                         getType = []  # [0] id, [1] quantity,[2] price ,[3] total
@@ -715,131 +838,222 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
             except Exception as e:
                 messagebox.showerror("ERROR", f"ERROR: {e}")
 
-    def deals(self, *args, id=''):
-        if id == '':
-            pass
-        else:
-            try:
+    def deals(self, *args):  # remove old def deals
+        from data.callDB import callDB
+        db = callDB()
+
+        def checkDeals(id='', type=''):
+            db.cursor.execute(f"SELECT * FROM DEAL_DATA WHERE DEAL_ID = '{id}'")
+            db.conn.commit()
+            rawValue = db.cursor.fetchone()
+
+            # print(rawValue)   #debug
+
+            #@ BELI X DAPAT Y
+            def CODE1():
                 try:
-                    print("DEALS with ID: ", id)
-                    from data.callDB import callDB
-                    db = callDB()
-                    db.cursor.execute(f"SELECT * FROM DEAL_DATA WHERE DEAL_ID = '{id}'")
-                    db.conn.commit()
-                    rawValue = db.cursor.fetchone()
-                    print(rawValue)
+                    if 'BELI' in str(rawValue[6]) and 'DAPAT' in str(rawValue[6]):
+                        # print("CODE 1")   #debug Check Code
+                        rawItem = [self.getPrdID.get(), self.productName, str(self.getPrdQty.get()),
+                                   str(round(float(self.getPrdPrice.get()), 2)),
+                                   str(self.getPrdQty.get() * round(self.getPrdPrice.get(), 2))]
+                        getType = []  # [0] id, [1] quantity,[2] price ,[3] total
+                        n = 0
+                        p = 0
 
-                    # BELI X DAPAT Y
-                    def CODE1():
+                        for a in range(0, len(rawItem)):
+                            if len(rawItem) > n:
+                                db.cursor.execute(f"SELECT * FROM PRODUCT WHERE PRODUCT_ID = '{rawItem[n]}'")
+                                db.conn.commit()
+                                # rawValue[1] = product_types, rawValue[2] = product_name
+                                if rawValue[2] != None:
+                                    if db.cursor.fetchone()[1] == str(rawValue[2]):
+                                        getType.append(rawItem[n])
+                                        getType.append(rawItem[n + 2])
 
-                        try:
-                            if 'BELI' in str(rawValue[6]) and 'DAPAT' in str(rawValue[6]):
-                                print("CODE 1")
-                                rawItem = []
-                                getType = []  # [0] id, [1] quantity,[2] price ,[3] total
-                                n = 0
-                                p = 0
-                                for child in self.buyScreen.get_children():
-                                    for i in self.buyScreen.item(child)["values"]:
-                                        rawItem.append(i)
-                                for a in range(0, len(rawItem)):
-                                    if len(rawItem) > n:
-                                        db.cursor.execute(f"SELECT * FROM PRODUCT WHERE PRODUCT_ID = '{rawItem[n]}'")
-                                        db.conn.commit()
-                                        # rawValue[1] = product_types, rawValue[2] = product_name
-                                        if rawValue[2] != None:
-                                            if db.cursor.fetchone()[1] == str(rawValue[2]):
-                                                getType.append(rawItem[n])
-                                                getType.append(rawItem[n + 2])
+                                elif rawValue[1] != None:
+                                    if db.cursor.fetchone()[1] == str(rawValue[1]):
+                                        # print(db.cursor.fetchall())   #check db fetchall
+                                        getType.append(rawItem[n])  # prd id
+                                        getType.append(rawItem[n + 2])  # prd qty
+                                        getType.append(rawItem[n + 3])  # prd price
+                                        getType.append(rawItem[n + 4])  # prd total
 
-                                        elif rawValue[1] != None:
-                                            if db.cursor.fetchone()[1] == str(rawValue[1]):
-                                                print(db.cursor.fetchall())
-                                                getType.append(rawItem[n])  # prd id
-                                                getType.append(rawItem[n + 2])  # prd qty
-                                                getType.append(rawItem[n + 3])  # prd price
-                                                getType.append(rawItem[n + 4])  # prd total
-                                        n = n + 5
+                                n = n + 5
 
-                                print(getType)
-                                n = 0
-                                for i in range(0, len(getType)):
-                                    if len(getType) > n:
-                                        p = p + getType[n + 1]
-                                        n = n + 4
-                                x = int(rawValue[3])
-                                y = float(rawValue[4])
-                                toDiscount = (p - (p % x))
-                                code1Discount = (toDiscount / x) * ((float(getType[2]) * x) - y)
-                                print(code1Discount,'BELI ' + str(x) ,'DAPAT ' + str(y))
-                                self.dealDiscount = self.dealDiscount + code1Discount
-                            else:
-                                print("find 1 else")
-                        except:
-                            print("find 1 except")
+                        # print(getType)    #debug check type
+                        # if getType == []:
+                        #     print(False)
+                        n = 0
+                        for i in range(0, len(getType)):
+                            if len(getType) > n:
+                                p = p + int(getType[n + 1])
+                                n = n + 4
+                        x = int(rawValue[3])
+                        y = float(rawValue[4])
+                        toDiscount = (p - (p % x))
+                        code1Discount = (toDiscount / x) * ((float(getType[2]) * x) - y)
+                        # print(code1Discount,'BELI ' + str(x) ,'DAPAT ' + str(y))  #debug Tell About The Code
+                        self.showDiscount = code1Discount
+                    else:
+                        # print("find 1 else")   #debug
+                        pass
+                except Exception as e:
+                    # print("find 1 : ", e)  # debug
+                    pass
 
-                    # LEBIH X 1 DAPAT Y
-                    def CODE2():
-                        try:
-                            if 'LEBIH' in str(rawValue[6]) and 'DAPAT' in str(rawValue[6]):
-                                print("CODE 2")
-                                rawItem = []
-                                getType = []  # [0] id, [1] quantity,[2] price ,[3] total
-                                n = 0
-                                p = 0
-                                for child in self.buyScreen.get_children():
-                                    for i in self.buyScreen.item(child)["values"]:
-                                        rawItem.append(i)
-                                for a in range(0, len(rawItem)):
-                                    if len(rawItem) > n:
-                                        db.cursor.execute(f"SELECT * FROM PRODUCT WHERE PRODUCT_ID = '{rawItem[n]}'")
-                                        db.conn.commit()
-                                        # rawValue[1] = product_types, rawValue[2] = product_name
-                                        if rawValue[2] != None:
-                                            if db.cursor.fetchone()[1] == str(rawValue[2]):
-                                                getType.append(rawItem[n])
-                                                getType.append(rawItem[n + 2])
+            #@ BELI LEBIH X 1 DAPAT Y
+            def CODE2():
+                try:
+                    if 'LEBIH' in str(rawValue[6]) and 'DAPAT' in str(rawValue[6]):
+                        # print("CODE 2")   #debug
+                        rawItem = [self.getPrdID.get(), self.productName, str(self.getPrdQty.get()),
+                                   str(round(float(self.getPrdPrice.get()), 2)),
+                                   str(self.getPrdQty.get() * round(self.getPrdPrice.get(), 2))]
+                        getType = []  # [0] id, [1] quantity,[2] price ,[3] total
+                        n = 0
+                        p = 0
 
-                                        elif rawValue[1] != None:
-                                            if db.cursor.fetchone()[1] == str(rawValue[1]):
-                                                print(db.cursor.fetchall())
-                                                getType.append(rawItem[n])  # prd id
-                                                getType.append(rawItem[n + 2])  # prd qty
-                                                getType.append(rawItem[n + 3])  # prd price
-                                                getType.append(rawItem[n + 4])  # prd total
-                                        n = n + 5
+                        for a in range(0, len(rawItem)):
+                            if len(rawItem) > n:
+                                db.cursor.execute(f"SELECT * FROM PRODUCT WHERE PRODUCT_ID = '{rawItem[n]}'")
+                                db.conn.commit()
+                                # rawValue[1] = product_types, rawValue[2] = product_name
+                                if rawValue[2] != None:
+                                    if db.cursor.fetchone()[1] == str(rawValue[2]):
+                                        getType.append(rawItem[n])
+                                        getType.append(rawItem[n + 2])
 
-                                print(getType)
-                                n = 0
-                                for i in range(0, len(getType)):
-                                    if len(getType) > n:
-                                        p = p + getType[n + 1]
-                                        n = n + 4
-                                k = 0
-                                x = int(rawValue[3])
-                                y = float(rawValue[4])
+                                elif rawValue[1] != None:
+                                    if db.cursor.fetchone()[1] == str(rawValue[1]):
+                                        # print(db.cursor.fetchall())   #debug fetchall
+                                        getType.append(rawItem[n])  # prd id
+                                        getType.append(rawItem[n + 2])  # prd qty
+                                        getType.append(rawItem[n + 3])  # prd price
+                                        getType.append(rawItem[n + 4])  # prd total
 
-                                if p >= x:
+                                n = n + 5
+
+                        # print(getType)    #debug
+                        n = 0
+                        for i in range(0, len(getType)):
+                            if len(getType) > n:
+                                p += int(getType[n + 1])
+                                n = n + 4
+
+
+                        k = 0
+                        x = int(rawValue[3])
+                        y = float(rawValue[4])
+
+
+                        for c in self.cache_code2:
+                            # print('RUN FOR ', type)
+                            if type in c:
+                                if self.cache_code2[self.cache_code2.index(c)][1] == 'end':
                                     k = k + (float(getType[2]) - y)
-                                print(k)
-                                toDiscount = k * int(getType[1])
-                                code1Discount = toDiscount
-                                print(code1Discount, 'LEBIH ' + str(x), '1 DAPAT ' + str(y))
-                                self.dealDiscount = self.dealDiscount + code1Discount
+                                    toDiscount = k * int(getType[1])
+                                    # print(code1Discount, 'LEBIH ' + str(x), '1 DAPAT ' + str(y))  #debug
+                                    self.showDiscount = toDiscount
+                                    # self.dealDiscount += toDiscount
+                                    break
+
+                                else:
+
+                                    self.cache_code2[self.cache_code2.index(c)][1] += int(getType[1])
+
+
+
+                                if p >= x or int(self.cache_code2[self.cache_code2.index(c)][1]) >= x:
+                                    k = k + (float(getType[2]) - y)
+                                    toDiscount = k * int(getType[1])
+                                    # print(code1Discount, 'LEBIH ' + str(x), '1 DAPAT ' + str(y))  #debug
+                                    self.showDiscount = toDiscount
+                                    # self.dealDiscount += toDiscount
+                                    if int(self.cache_code2[self.cache_code2.index(c)][1]) >= x:
+                                        self.cache_code2[self.cache_code2.index(c)][1] = 'end'
+                                    break
+
+                                else:
+                                    k = k + (float(getType[2]) - y)
+                                    self.cache_code2.append([self.getPrdID.get(), k*int(getType[1])])
+                                    break
+
                             else:
-                                print("find 2 else")
-                        except:
-                            print(n, k, x, y)
-                            print('find 2 except')
-
-                    CODE1()
-                    CODE2()
+                                pass
 
 
-                except:
-                    messagebox.showerror("ERROR", f"DEALS ID NOT FOUND")
-            except:
-                messagebox.showerror("ERROR", f"ERROR: {Exception}")
+
+
+                    else:
+                        # print("find 2 else")    #debug
+                        pass
+                except Exception as e:
+                    # print(n, k, x, y)   #debug Show n, x, k, y value Ignored
+                    # print('find 2 :', e)  # debug
+                    pass
+
+
+            CODE1()
+            CODE2()
+
+
+        try:
+            db.cursor.execute(f"SELECT * FROM DEAL")
+            db.conn.commit()
+            rawValue = db.cursor.fetchall()
+            db.cursor.execute(f"SELECT * FROM PRODUCT_DATA WHERE PRODUCT_ID = '{self.getPrdID.get()}'")
+            db.conn.commit()
+            catch_data = db.cursor.fetchone()
+            # print(rawValue)   #debug
+            # print(catch_data)
+
+            for i in rawValue:
+                if catch_data[2] in i:
+                    if self.cache_code2 == []:
+                        self.cache_code2.append([catch_data[2], 0])
+                    for cache in self.cache_code2:
+                        if catch_data[2] in cache:
+                            break
+                        else:
+                            self.cache_code2.append([catch_data[2], 0])
+                            break
+
+                    # print("found", self.cache_code2)
+                    checkDeals(i[0], catch_data[2])
+                    break
+
+                #TODO Need to fix more, slack everywhere
+
+
+
+
+        except Exception as e:
+            messagebox.showerror("ERROR", f"ERROR: {e}")
+
+    def fixBuyScreen(self):
+        base = []
+        calc_disc = []
+        for child in self.buyScreen.get_children():
+            base.append([self.buyScreen.item(child)["values"][i] for i in range(6)])
+            self.buyScreen.delete(child)
+
+        for i in base:
+            for k in self.cache_code2:
+                if str(k[0]) in str(i[0]):
+                    if base[base.index(i)][5] == 0:
+                        base[base.index(i)][5] = float(k[1])
+
+            self.buyScreen.insert("", END, value=i)
+
+        for child1 in self.buyScreen.get_children():
+            calc_disc.append([self.buyScreen.item(child1)["values"][i] for i in range(6)])
+
+        for c in calc_disc:
+            self.dealDiscount += float(c[5])
+
+        # pprint(base)
+        # pprint(self.cache_code2)  #debug
 
     # misc config
     def updateTime(self):
@@ -858,16 +1072,322 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
         self.getPrdID.set('')
         self.getPrdPrice.set(0)
         self.getPrdQty.set(0)
-        print("destroy")
+        # print("destroy")  #debug
 
     def backChoice(self):
-        print("Back")
+        # print("Back") #debug
+        self.checkExcel()
+        self.saveExit()
         from session_start import SessionStart
         self.cashWin.destroy()
         start_choice = SessionStart().auth(Tk())
         return start_choice
 
+    def exitWindow(self):
+        self.checkExcel()
+        self.saveExit()
+        exit()
+
     # report GET
+    def saveExcel(self):
+        try:
+
+            SAVE_PATH = 'data/Report Data/'
+            BASE_FILE = SAVE_PATH + '/daily_report_example.xlsx'
+            EXCEL_FILE = SAVE_PATH + str(date.today()) + '.xlsx'
+            base = []
+
+            # Precaution if BASE_FILE not found
+            if not os.path.exists(os.path.abspath(BASE_FILE)):
+                try:
+                    wb = pyxl.Workbook()
+                    ws = wb.active
+                    ws.sheet_view.showGridLines = True
+                    ws.title = "MAIN"
+                    ws.column_dimensions['A'].width = 20
+                    ws.column_dimensions['B'].width = 30
+                    ws.column_dimensions['C'].width = 10
+                    ws.column_dimensions['D'].width = 10
+                    ws.column_dimensions['E'].width = 10
+                    ws['D1'].alignment = Alignment(wrap_text=True)
+                    ws['E1'].alignment = Alignment(wrap_text=True)
+                    ws['A1'].value = 'Code'
+                    ws['B1'].value = 'Name'
+                    ws['C1'].value = 'Qty Sold'
+                    ws['D1'].value = """Total Sales\nAmount\n(Gross RM)"""
+                    ws['E1'].value = """Average\nUnit Price\nRM"""
+                    wb.save(filename=BASE_FILE)
+                    wb.close()
+                except OSError as exc:  # Guard against race condition
+                    if exc.errno != errno.EEXIST:
+                        raise
+
+            # OPEN AND COPY FILE
+            if not os.path.exists(os.path.abspath(EXCEL_FILE)):
+                try:
+                    shutil.copyfile(os.path.abspath(BASE_FILE), os.path.abspath(EXCEL_FILE))
+                except OSError as exc:  # Guard against race condition
+                    if exc.errno != errno.EEXIST:
+                        raise
+
+            self.checkExcel()  # check if saveExit existed or not
+
+            for child in self.buyScreen.get_children():
+                base.append([self.buyScreen.item(child)["values"][i] for i in range(6)])
+
+            # print(base)   #debug
+            '''EXCEL FOR REPORT DATA A.Code B.Name C.Qty D.Total E.Avg'''
+            theFile = pyxl.load_workbook(EXCEL_FILE)
+            allSheetNames = theFile.sheetnames
+            qty_adj = 'C'
+            total_adj = 'D'
+            avg_adj = 'E'
+
+            for sheet in allSheetNames:
+                # print("Current sheet name is {}".format(sheet))   #debug find sheet
+                currentSheet = theFile[sheet]
+
+            def find_cell(value="", show="row"):
+                for row in range(1, currentSheet.max_row + 1):
+                    for column in "ABCDE":  # Here you can add or reduce the columns
+                        cell_name = "{}{}".format(column, row)
+
+                        if currentSheet[cell_name].value == value:
+                            # print("{1} cell is located on {0}" .format(cell_name, currentSheet[cell_name].value))
+                            # print("cell position {} has value {}".format(cell_name, currentSheet[cell_name].value))   #debug
+                            # print(column, row)
+                            if show.lower() == "row":
+                                return row
+                            elif show.lower() == "column":
+                                return column
+                            elif show.lower() == "cell":
+                                return cell_name
+                            else:
+                                return 'Only row, column, cell'
+
+            def add_cell(value=['x', 'x', 1, 1.1, 1.1], column="ABCDE"):
+                '''value Must depends on columns like 5 value for "ABCDE" '''
+
+                wb = xlrd.open_workbook(EXCEL_FILE)
+                sheet = wb.sheet_by_index(0)
+
+                check_row = sheet.nrows
+                i = 0
+                for col in column:  # Here you can add or reduce the columns
+                    cell_name = "{}{}".format(col, (check_row + 1))
+                    currentSheet[cell_name].value = value[i]
+                    i += 1
+
+                # print("Successfully add new item")  #debug
+                theFile.save(EXCEL_FILE)
+                theFile.close()
+
+            k = 0
+            for data in base:
+                row_adj = str(find_cell(value=data[k], show='row'))
+                if row_adj == 'None':
+                    add_cell(value=[str(data[0]), data[1], data[2], float(data[4]) - float(data[5]),
+                                    (float(data[4]) - float(data[5])) / float(data[2])])
+                else:
+                    currentSheet[qty_adj + row_adj].value = int(currentSheet[qty_adj + row_adj].value) + int(data[2])
+                    currentSheet[total_adj + row_adj].value = float(
+                        float(currentSheet[total_adj + row_adj].value) + (float(data[4]) - float(data[5])))
+                    currentSheet[avg_adj + row_adj].value = (float(currentSheet[total_adj + row_adj].value) + float(
+                        data[4]) - float(data[5])) / \
+                                                            (int(currentSheet[qty_adj + row_adj].value) + int(data[2]))
+
+                    theFile.save(EXCEL_FILE)
+                    theFile.close()
 
 
-CashierWin(Tk(), ID='RZ0000E005')
+        except Exception as e:
+            messagebox.showerror("ERROR", f"{e} . PLS CONTACT PROVIDER TO FIX IT")
+
+    def saveExit(self):
+        try:
+            SAVE_PATH = 'data/Report Data/'
+            BASE_FILE = SAVE_PATH + '/daily_report_example.xlsx'
+            EXCEL_FILE = SAVE_PATH + str(date.today()) + '.xlsx'
+
+            # Precaution if BASE_FILE not found
+            if not os.path.exists(os.path.abspath(BASE_FILE)):
+                try:
+                    wb = pyxl.Workbook()
+                    ws = wb.active
+                    ws.sheet_view.showGridLines = True
+                    ws.title = "MAIN"
+                    ws.column_dimensions['A'].width = 20
+                    ws.column_dimensions['B'].width = 30
+                    ws.column_dimensions['C'].width = 10
+                    ws.column_dimensions['D'].width = 10
+                    ws.column_dimensions['E'].width = 10
+                    ws['D1'].alignment = Alignment(wrap_text=True)
+                    ws['E1'].alignment = Alignment(wrap_text=True)
+                    ws['A1'].value = 'Code'
+                    ws['B1'].value = 'Name'
+                    ws['C1'].value = 'Qty Sold'
+                    ws['D1'].value = """Total Sales\nAmount\n(Gross RM)"""
+                    ws['E1'].value = """Average\nUnit Price\nRM"""
+                    wb.save(filename=BASE_FILE)
+                    wb.close()
+                except OSError as exc:  # Guard against race condition
+                    if exc.errno != errno.EEXIST:
+                        raise
+
+            # OPEN AND COPY FILE
+            if not os.path.exists(os.path.abspath(EXCEL_FILE)):
+                try:
+                    shutil.copyfile(os.path.abspath(BASE_FILE), os.path.abspath(EXCEL_FILE))
+                except OSError as exc:  # Guard against race condition
+                    if exc.errno != errno.EEXIST:
+                        raise
+
+            # openpyxl
+            theFile = pyxl.load_workbook(EXCEL_FILE)
+            allSheetNames = theFile.sheetnames
+            for sheet in allSheetNames:
+                # print("Current sheet name is {}".format(sheet))   #debug find sheet
+                currentSheet = theFile[sheet]
+
+            # xlrd
+            wb = xlrd.open_workbook(EXCEL_FILE)
+            sheetwb = wb.sheet_by_index(0)
+
+            target_row = sheetwb.nrows + 4
+
+            raw_data = [value for value in currentSheet.iter_rows(min_row=1,
+                                                                  max_row=sheetwb.nrows,
+                                                                  min_col=1,
+                                                                  max_col=5,
+                                                                  values_only=True)]
+            raw_data.pop(0)
+            # pprint(raw_data)    #debug
+
+            qty = price = 0
+            for data in raw_data:
+                # pprint(data)  #debug
+                qty += data[2]
+                price += data[3]
+            # print(qty, price)   #debug
+
+            currentSheet['A' + str(target_row)].alignment = Alignment(wrap_text=True)
+            currentSheet['A' + str(target_row + 1)].alignment = Alignment(wrap_text=True)
+            currentSheet['A' + str(target_row)].value = "Total Product\nSold Today"
+            currentSheet['A' + str(target_row + 1)].value = "Total Cash\nToday(RM)"
+            currentSheet['A' + str(target_row + 3)].value = "Date"
+            currentSheet['B' + str(target_row)].value = qty
+            currentSheet['B' + str(target_row + 1)].value = float(price)
+            currentSheet['B' + str(target_row + 3)].value = date.today()
+            theFile.save(EXCEL_FILE)
+            theFile.close()
+
+
+
+
+
+        except Exception as e:
+            messagebox.showerror("ERROR", f"{e} . PLS CONTACT PROVIDER TO FIX IT")
+
+    def checkExcel(self):
+        SAVE_PATH = 'data/Report Data/'
+        BASE_FILE = SAVE_PATH + '/daily_report_example.xlsx'
+        EXCEL_FILE = SAVE_PATH + str(date.today()) + '.xlsx'
+
+        if os.path.exists(os.path.abspath(EXCEL_FILE)):
+            theFile = pyxl.load_workbook(EXCEL_FILE)
+            allSheetNames = theFile.sheetnames
+
+            for sheet in allSheetNames:
+                # print("Current sheet name is {}".format(sheet))   #debug find sheet
+                currentSheet = theFile[sheet]
+
+                # xlrd
+                wb = xlrd.open_workbook(EXCEL_FILE)
+                sheetwb = wb.sheet_by_index(0)
+
+                raw_data = [value for value in currentSheet.iter_rows(min_row=1,
+                                                                      max_row=sheetwb.nrows,
+                                                                      min_col=1,
+                                                                      max_col=5,
+                                                                      values_only=True)]
+
+                footer = 7
+                header = sheetwb.nrows - footer
+                # pprint(raw_data)  #debug
+
+                for data in raw_data:
+                    if 'Date' in data:
+                        currentSheet.delete_rows(header + 1, footer)
+                        print('Footer found and deleted')
+                        theFile.save(EXCEL_FILE)
+                        theFile.close()
+
+        else:
+            messagebox.showwarning("No Data Found", f"Report for {date.today()} saved but no data inside")
+
+    def printExcel(self):
+        self.calendar_win = Toplevel(self.cashWin)
+        Label(self.calendar_win, text='Choose date').pack(padx=10, pady=10)
+        style = Style()
+        style.configure('W.TButton', font=('Comic sans ms', 15, 'normal', 'italic'), foreground='black')
+        style1 = 'W.TButton'
+
+        today = date.today()
+
+        mindate = date(year=2010, month=1, day=1)
+        maxdate = today
+        check_validate = StringVar()
+        validate = Label(self.calendar_win, text='Report Exist', textvariable=check_validate, font=('comic sans ms', 13, 'bold'), foreground='Green')
+
+        cal = tkcalendar.Calendar(self.calendar_win, font=('comic sans ms', 15, 'bold'), selectmode='day', locale='en_US',
+                       mindate=mindate, maxdate=maxdate, disabledforeground='red',
+                       cursor="hand1", year=today.year, month=today.month, day=today.day)
+
+
+        def print_report():
+            SAVE_PATH = 'data/Report Data/'
+            get_date = cal.selection_get()
+            EXCEL_FILE = SAVE_PATH + str(get_date)  + '.xlsx'
+
+            if os.path.exists(os.path.abspath(EXCEL_FILE)):
+                printfile = os.path.abspath(EXCEL_FILE)
+                try:
+                    os.startfile(rf"{printfile}", 'print')
+                    self.calendar_win.destroy()
+                    messagebox.showinfo("Printing", f"Report on {get_date} Printed Successfully")
+                except Exception as error:
+                    messagebox.showerror("Printer error", error)
+                    self.calendar_win.destroy()
+            else:
+                messagebox.showerror("Not Found", "Your Report NOT FOUND")
+                self.calendar_win.focus_force()
+
+
+        def is_validate(event):
+            SAVE_PATH = 'data/Report Data/'
+            get_date = cal.selection_get()
+            EXCEL_FILE = SAVE_PATH + str(get_date) + '.xlsx'
+
+            if os.path.exists(os.path.abspath(EXCEL_FILE)):
+                validate.config(foreground='green')
+                check_validate.set(f"Report {get_date} Exist")
+            else:
+                validate.config(foreground='red')
+                check_validate.set(f"Report {get_date} Not Exist")
+
+
+        self.calendar_win.bind("<Button-1>", is_validate)
+        cal.pack(fill="both", expand=True)
+        Button(self.calendar_win, text="Print", style='W.TButton' ,command=print_report).pack()
+        validate.pack()
+
+
+
+#TODO add order window and function
+#TODO will use and research for DELIVERY_FLOW
+#TODO use FLOW_CACHE
+#TODO try to think how to setup member data
+
+
+
+# CashierWin(Tk(), ID='RZ0000E005')  # debug for one cashier_win.py

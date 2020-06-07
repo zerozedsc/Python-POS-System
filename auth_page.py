@@ -3,11 +3,13 @@ import tkinter.simpledialog as sd
 from tkinter import *
 from tkinter.ttk import *
 from tkinter.ttk import Style
+from tkinter import messagebox
 import psycopg2
 from datetime import datetime
 import pyodbc
 import sqlite3
 from sys import exit
+from server import SERVER_PATH
 
 
 class AuthDisplay():
@@ -66,20 +68,20 @@ class AuthDisplay():
 
 
         try:
-            self.conn = sqlite3.connect('//Zerozed-pc/shared/DB/ROZERIYA-DB.db')  #\\Zerozed-pc\shared\DB
+            self.conn = sqlite3.connect(SERVER_PATH)  #\\Zerozed-pc\shared\DB
             self.cursor = self.conn.cursor()
 
             self.cursor.execute("SELECT * FROM EMPLOYEE;")
             self.record = self.cursor.fetchall()
-            print("YOU ARE CONNECTED TO DATABASE")
+            # print("YOU ARE CONNECTED TO DATABASE")      # check connection to database debug
             ID_list = []
             # list the database (EMPLOYEE_ID[0], EMPLOYEE_POS[1], EXIST[2])
             for i in list(self.record):
                 for x in i:
                     ID_list.append(str(x))
             self.test = True
-        except (Exception, pyodbc.Error) as error:
-            print("Error while connecting to database ", error)
+        except (Exception, sqlite3.Error) as error:
+            print("Error while connecting to database ", error)     # check connection to database debug SHOWED
             self.test = False
             self.found = error
         return ID_list
@@ -88,7 +90,7 @@ class AuthDisplay():
         self.ID_input = sd.askstring('EMPLOYEE ID', 'TAG YOUR ID')
         undetected = Label(self.authWin, text='ID: UNDETECTED', font=('comic sans ms', 18, 'italic', 'bold'),
                            background='silver', foreground='red')
-        er = Label(self.authWin, text='Tekan Butang Again', font=('comic sans ms', 10, 'italic', 'bold'),
+        er = Label(self.authWin, text='Tekan Butang Sekali Lagi', font=('comic sans ms', 10, 'italic', 'bold'),
                    background='silver', foreground='red')
         not_found = Label(self.authWin, text='ID: NOT FOUND', font=('comic sans ms', 18, 'italic', 'bold'),
                           background='silver', foreground='red')
@@ -100,7 +102,7 @@ class AuthDisplay():
             date = str(d.day) + '/' + str(d.month) + '/' + str(d.year)
             time = str(d.hour) + ':' + str(d.minute) + ':' + str(d.second)
             self.timestamp = d.timestamp()
-            print(date + ' ' + time)
+            print(date + ' ' + time)    # time debug ignore
             data_list = [i.strip(" ") for i in self.authConfig()]
             n = 0
             id_list = []
@@ -109,11 +111,14 @@ class AuthDisplay():
                     id_list.append(data_list[n])
                     n = n + 4  # 3 because the data start at 0 so 0, 1, 2 , 3 <- next id
 
-            print(str(id_list))
+            # print(str(id_list)) #debug
             if self.ID_input != '' and not None:
 
                 if self.ID_input.upper() in id_list:
-                    print("EXIST")
+                    # print("EXIST")    # debug find existed acc
+                    Label(self.authWin, text='                      ' ,
+                          font=('comic sans ms', 18, 'italic', 'bold'),
+                          background='silver', foreground='green').place(relx=0.3, rely=0.6)    #BLANK SPACE
                     Label(self.authWin, text='ID: ' + self.ID_input.upper(),
                           font=('comic sans ms', 18, 'italic', 'bold'),
                           background='silver', foreground='green').place(relx=0.3, rely=0.6)
@@ -152,11 +157,11 @@ class AuthDisplay():
                 else:
                     not_found.place(relx=0.3, rely=0.6)
                     self.again_button.config(state='normal')
-                    print("ID NOT FOUND")
+                    # print("ID NOT FOUND")     #debug not found id
             else:
                 undetected.place(relx=0.3, rely=0.6)
                 self.again_button.config(state='normal')
-                print("False")
+                print("False")      #debug False Checked
         except AttributeError as error:
             er.place(relx=0.3, rely=0.6)
             self.again_button.config(state='normal')
@@ -171,9 +176,10 @@ class AuthDisplay():
                 self.cursor.execute(command, data_to_input)
                 self.conn.commit()
                 count = self.cursor.rowcount
-                print(count ," INSERT SUCCESSFUL")
-            except (Exception, pyodbc.Error) as error:
-                print("Error while connecting to PostgreSQL ", error)
+                # print(count ," INSERT SUCCESSFUL")    #debug check inserted data
+            except (Exception, sqlite3.Error) as error:
+                print("Error while connecting to database ", error)
+                messagebox.showerror("Database Error",error)
         elif self.pos == 'SUPERVISOR':
             try:
                 command =""" INSERT INTO AUTH_SUPERVISOR
@@ -183,9 +189,10 @@ class AuthDisplay():
                 self.cursor.execute(command, data_to_input)
                 self.conn.commit()
                 count = self.cursor.rowcount
-                print(count, " INSERT SUCCESSFUL")
-            except (Exception, psycopg2.Error) as error:
-                print("Error while connecting to PostgreSQL ", error)
+                # print(count ," INSERT SUCCESSFUL")    #debug check inserted data
+            except (Exception, sqlite3.Error) as error:
+                print("Error while connecting to database ", error)
+                messagebox.showerror("Database Error", error)
         elif self.pos == 'EMPLOYEE':
             try:
                 command =""" INSERT INTO AUTH_EMPLOYEE
@@ -195,11 +202,13 @@ class AuthDisplay():
                 self.cursor.execute(command, data_to_input)
                 self.conn.commit()
                 count = self.cursor.rowcount
-                print(count, " INSERT SUCCESSFUL")
-            except (Exception, pyodbc.Error) as error:
+                # print(count ," INSERT SUCCESSFUL")    #debug check inserted data
+            except (Exception, sqlite3.Error) as error:
                 print("Error while connecting to database ", error)
+                messagebox.showerror("Database Error", error)
 
 
+#TODO Make a window to show report who are log in with AUTH_MANAGER, AUTH_EMPLOYEE, AUTH_SUPERVISOR
 
 
 # AuthDisplay(Tk())

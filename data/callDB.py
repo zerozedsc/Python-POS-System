@@ -11,7 +11,7 @@ class callDB():
         try:
             self.conn = sqlite3.connect(pathDB)  # \\Zerozed-pc\shared\DB
             self.cursor = self.conn.cursor()
-            print(f"{pathDB} found")
+            # print(f"{pathDB} found")    #debug Path DB Found
         except:
             getCall = messagebox.askyesnocancel("ERROR", "DATABASE NOT FOUND", icon='error')
             if getCall== True:
