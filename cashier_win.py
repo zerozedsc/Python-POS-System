@@ -363,7 +363,7 @@ class CashierWin():
                     "\n__________________________________________________________________" \
                     ""
             resitComp = """__________________________________\n
-item\t          Qty    S/Price    Amount"""  # 2/slash
+item\t       Qty   S/Price   Total  Off"""  # 2/slash
 
             self.outputArea.insert(1.0, intro, 'CENTER')
             date = f"DATE&TIME: {str(self.dateNow)} {str(time.strftime('%H:%M:%S%p'))} \n"
@@ -527,8 +527,7 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
             else:
                 messagebox.showwarning("SALE INPUT", "NO SALE INPUT TO TOTAL Else")
         except Exception as e:
-            print(e)
-            messagebox.showwarning("SALE INPUT", "NO SALE INPUT TO TOTAL excpt")
+            messagebox.showwarning("SALE INPUT", e)
 
     def totalCmd(self):
         def printResult():
@@ -589,24 +588,6 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
                                           str(round(self.calc, 2)), self.showDiscount))
                 self.buy.append(str(self.getPrdID.get()))
                 self.buy.append(str(self.getPrdQty.get()))
-                filename = self.filename
-                if not os.path.exists(os.path.dirname(filename)):
-                    try:
-                        os.makedirs(os.path.dirname(filename))
-                    except OSError as exc:  # Guard against race condition
-                        if exc.errno != errno.EEXIST:
-                            raise
-                with open(filename, "a") as f:
-                    if len(self.productName) > 15:
-                        shorter = self.productName[0]
-                        for i in range(0, len(str(self.productName))):
-                            if str(self.productName)[i] == " ":
-                                shorter = shorter + str(self.productName)[i + 1]
-                    else:
-                        shorter = self.productName
-                    productApd = f"""{self.productName}\n{self.getPrdID.get()}  {str(self.getPrdQty.get())}  RM{priceRound}  RM{round(self.calc, 2)}\n"""
-                    f.write(productApd)
-                    f.close()
                 self.cancel()
 
             else:
@@ -628,9 +609,10 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
         test = ''
         totalPrice = 0.00
         for child in self.buyScreen.get_children():
-            component.append(self.buyScreen.item(child)["values"][4])
+            component.append(float(self.buyScreen.item(child)["values"][4]) + float(self.buyScreen.item(child)["values"][5]))
         for i in component:
-            totalPrice = totalPrice + float(i)
+            # print(component)  #debug
+            totalPrice += float(i)
         calcRounding = round(totalPrice - round(totalPrice, 1), 2)
         if calcRounding < 0:
             a = ''
@@ -1050,16 +1032,34 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
                 if str(k[0]) in str(i[0]):
                     if base[base.index(i)][5] == 0:
                         base[base.index(i)][5] = float(k[1])
+                        self.cache_code2.pop(self.cache_code2.index(k))
+
+
             base[base.index(i)][4] = float(base[base.index(i)][4]) - float(base[base.index(i)][5])
 
-            self.buyScreen.insert("", END, value=i)
+        for g in base:
+            for p in base:
+                if base[base.index(g)] == base[base.index(p)]:
+                    pass
+                elif g[0] in base[base.index(p)]:
+                    base[base.index(g)][5] = float(base[base.index(g)][5]) + float(base[base.index(p)][5])
+                    base[base.index(g)][4] = float(base[base.index(g)][4]) + float(base[base.index(p)][4])
+                    base[base.index(g)][2] = int(base[base.index(g)][2]) + int(base[base.index(p)][2])
+                    base.pop(base.index(p))
+                    # print(base)   #debug
+
+        for t in base:
+            self.buyScreen.insert("", END, value=t)
 
         for child1 in self.buyScreen.get_children():
             calc_disc.append([self.buyScreen.item(child1)["values"][i] for i in range(6)])
 
-        for c in calc_disc:
-            self.dealDiscount += float(c[5])
-
+        for k in calc_disc:
+            with open(self.filename, "a") as f:
+                productApd = f"""{calc_disc[calc_disc.index(k)][1]}\n{calc_disc[calc_disc.index(k)][0]}  {str(calc_disc[calc_disc.index(k)][2])}  RM{calc_disc[calc_disc.index(k)][3]}  RM{calc_disc[calc_disc.index(k)][4]} -{calc_disc[calc_disc.index(k)][5]}\n"""
+                f.write(productApd)
+                f.close()
+            self.dealDiscount += float(k[5])
         # pprint(base)
         # pprint(self.cache_code2)  #debug
 
@@ -1395,7 +1395,8 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
 #TODO will use and research for DELIVERY_FLOW
 #TODO use FLOW_CACHE
 #TODO try to think how to setup member data
+#TODO small bug for code1
 
 
+CashierWin(Tk(), ID='RZ0000E005')  # debug for one cashier_win.py
 
-# CashierWin(Tk(), ID='RZ0000E005')  # debug for one cashier_win.py
