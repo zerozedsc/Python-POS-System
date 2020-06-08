@@ -1,8 +1,5 @@
 import sqlite3
-import tkinter as tk
 from tkinter import messagebox, filedialog
-from tkinter import *
-import os
 from server import SERVER_PATH as PATH
 
 class callDB():

@@ -39,7 +39,7 @@ class CashierWin():
         style1 = 'W.TButton'
 
         # Setup Var
-        self.IDcashier = ID
+        self.IDcashier = ID.upper()
         self.dateNow = datetime.now().strftime("%d/%b/%Y")
         self.n = 0
         self.k = 0
@@ -60,22 +60,26 @@ class CashierWin():
 
         # Cashier Name
         def name():
-            conn = sqlite3.connect(PATH)
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM EMPLOYEE_DATA ORDER BY EMPLOYEE_ID;")
-            query1 = cursor.fetchall()
-            name = []
-            for i in query1:
-                for x in i:
-                    name.append(str(x))
+            try:
+                conn = sqlite3.connect(PATH)
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM EMPLOYEE_DATA ORDER BY EMPLOYEE_ID;")
+                query1 = cursor.fetchall()
+                name = []
+                for i in query1:
+                    for x in i:
+                        name.append(str(x))
 
-            cashierName = 'NAME: ' + str(name[name.index(self.IDcashier) + 1])
-            nameLen = len(list(map(len, cashierName)))
-            wordLen = list(map(len, cashierName.split(" ")))
+                cashierName = 'NAME: ' + str(name[name.index(self.IDcashier.upper()) + 1])
+                nameLen = len(list(map(len, cashierName)))
+                wordLen = list(map(len, cashierName.split(" ")))
 
-            namelbl = Label(self.cashWin, text=cashierName, font=('comic sans ms', 13, 'bold'),
-                            foreground='blue')
-            namelbl.place(relx=0, rely=0.041)
+                namelbl = Label(self.cashWin, text=cashierName, font=('comic sans ms', 13, 'bold'),
+                                foreground='blue')
+                namelbl.place(relx=0, rely=0.041)
+            except (Exception, sqlite3.Error) as error:
+                messagebox.showerror('ERROR', error + ' Please contact Service Team')
+
 
         # product detail
         def productDetail(*args):
@@ -699,94 +703,97 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
         try:
             self.adjust = sd.askstring('REGISTER ITEM', f'PRODUCT ID ')
 
+            if self.adjust is None:
+                pass
+            else:
+                for i in query:
+                    if self.adjust.upper() in i:
+                        check_productID = self.adjust.upper()
+                        break
 
-            for i in query:
-                if self.adjust.upper() in i:
-                    check_productID = self.adjust.upper()
-                    break
+                if self.adjust.upper() in check_productID:
+                    if "RZ" and 'P' in self.adjust.upper() or len(self.adjust) >= 10:
+                        self.addWin = Toplevel(self.cashWin)
+                        self.addWin.resizable(0, 0)
+                        self.windowHeight = int(self.addWin.winfo_reqheight())
+                        self.windowWidth = int(self.addWin.winfo_reqwidth())
+                        self.positionRight = int(self.addWin.winfo_screenwidth() / 2 - (self.windowWidth / 2))
+                        self.positionDown = int(self.addWin.winfo_screenheight() / 2 - (self.windowHeight / 2))
+                        self.addWin.iconphoto(False, PhotoImage(file='images/rozeriya.png'))
+                        self.addWin.geometry(f"400x200+{self.positionRight - 400}+{self.positionDown - 300}")
+                        self.addWin.title("ADD ITEM")
 
-            if self.adjust.upper() in check_productID:
-                if "RZ" and 'P' in self.adjust.upper() or len(self.adjust) >= 10:
-                    self.addWin = Toplevel(self.cashWin)
-                    self.addWin.resizable(0, 0)
-                    self.windowHeight = int(self.addWin.winfo_reqheight())
-                    self.windowWidth = int(self.addWin.winfo_reqwidth())
-                    self.positionRight = int(self.addWin.winfo_screenwidth() / 2 - (self.windowWidth / 2))
-                    self.positionDown = int(self.addWin.winfo_screenheight() / 2 - (self.windowHeight / 2))
-                    self.addWin.iconphoto(False, PhotoImage(file='images/rozeriya.png'))
-                    self.addWin.geometry(f"400x200+{self.positionRight - 400}+{self.positionDown - 300}")
-                    self.addWin.title("ADD ITEM")
+                        Label(self.addWin, text="REGISTER ITEM", font=('comic sans ms', 18, 'italic', 'bold')).pack()
 
-                    Label(self.addWin, text="REGISTER ITEM", font=('comic sans ms', 18, 'italic', 'bold')).pack()
+                        self.getQtyA = IntVar()
+                        qty_before = 0
 
+                        # ID DISABLED
+                        Label(self.addWin, text='PRODUCT ID', font=('Comic sans ms', 12, 'normal', 'italic')).place(
+                            relx=0,
+                            rely=0.2)
+                        reg_entry = Label(self.addWin, font=('Comic sans ms', 12, 'normal', 'italic'),
+                                          text=self.adjust)
+                        reg_entry.place(relx=0.38, rely=0.2, width=240)
 
-                    self.getQtyA = IntVar()
-                    qty_before = 0
+                        # NAME
+                        Label(self.addWin, text='PRODUCT NAME',
+                              font=('Comic sans ms', 12, 'normal', 'italic')).place(relx=0, rely=0.35)
+                        self.name_entry = Entry(self.addWin, state='disabled')
 
-                    # ID DISABLED
-                    Label(self.addWin, text='PRODUCT ID', font=('Comic sans ms', 12, 'normal', 'italic')).place(
-                        relx=0,
-                        rely=0.2)
-                    reg_entry = Label(self.addWin, font=('Comic sans ms', 12, 'normal', 'italic'),
-                                      text=self.adjust)
-                    reg_entry.place(relx=0.38, rely=0.2, width=240)
+                        for k in query:
+                            if self.adjust.upper() in k:
+                                self.name_entry.config(state='normal')
+                                self.name_entry.insert(0, k[1])
+                                qty_before = int(k[4])
+                                Label(self.addWin, text=f'QUANTITY NOW: {qty_before}',
+                                      font=('Comic sans ms', 12, 'normal', 'italic')).place(relx=0, rely=0.48)
+                                self.name_entry.config(state='disabled')
+                                break
+                        self.name_entry.place(relx=0.38, rely=0.35, width=240)
 
-                    # NAME
-                    Label(self.addWin, text='PRODUCT NAME',
-                          font=('Comic sans ms', 12, 'normal', 'italic')).place(relx=0, rely=0.35)
-                    self.name_entry = Entry(self.addWin, state='disabled')
+                        # QUANTITY
+                        Label(self.addWin, text='ADD STOCK',
+                              font=('Comic sans ms', 12, 'normal', 'italic')).place(relx=0, rely=0.6)
+                        self.qty_entry = Entry(self.addWin, textvariable=self.getQtyA)
+                        self.qty_entry.place(relx=0.38, rely=0.6, width=240)
 
-                    for k in query:
-                        if self.adjust.upper() in k:
-                            self.name_entry.config(state='normal')
-                            self.name_entry.insert(0, k[1])
-                            qty_before = int(k[4])
-                            Label(self.addWin, text=f'QUANTITY NOW: {qty_before}',
-                                  font=('Comic sans ms', 12, 'normal', 'italic')).place(relx=0, rely=0.48)
-                            self.name_entry.config(state='disabled')
-                            break
-                    self.name_entry.place(relx=0.38, rely=0.35, width=240)
+                        def query_update():
+                            ID = self.adjust.upper()
 
-                    # QUANTITY
-                    Label(self.addWin, text='ADD STOCK',
-                          font=('Comic sans ms', 12, 'normal', 'italic')).place(relx=0, rely=0.6)
-                    self.qty_entry = Entry(self.addWin, textvariable=self.getQtyA)
-                    self.qty_entry.place(relx=0.38, rely=0.6, width=240)
+                            if str(self.getQtyA.get()).isdigit():
+                                STOCK = qty_before + int(self.getQtyA.get())
+                            else:
+                                STOCK = qty_before
+                                messagebox.showerror("Number Only", "Number only except")
 
-                    def query_update():
-                        ID = self.adjust.upper()
-
-                        if str(self.getQtyA.get()).isdigit():
-                            STOCK = qty_before + int(self.getQtyA.get())
-                        else:
-                            STOCK = qty_before
-                            messagebox.showerror("Number Only", "Number only except")
-
-                        try:
-                            cursor.execute("""UPDATE PRODUCT_DATA
-                                                                                                                            SET QUANTITY = ?
-                                                                                                                           WHERE 
-                                                                                                                                   PRODUCT_ID = ?""",
-                                       (STOCK, ID))
-                            conn.commit()
-                            messagebox.showinfo("SUCCESS", f"ADD INTO {ID} DONE")
-                            self.addWin.destroy()
+                            try:
+                                cursor.execute("""UPDATE PRODUCT_DATA
+                                                                                                                                SET QUANTITY = ?
+                                                                                                                               WHERE 
+                                                                                                                                       PRODUCT_ID = ?""",
+                                               (STOCK, ID))
+                                conn.commit()
+                                messagebox.showinfo("SUCCESS", f"ADD INTO {ID} DONE")
+                                self.addWin.destroy()
 
 
-                        except (Exception, sqlite3.Error) as error:
-                            messagebox.showerror("FAILED", f"error: {error}")
-                            self.addWin.destroy()
+                            except (Exception, sqlite3.Error) as error:
+                                messagebox.showerror("FAILED", f"error: {error}")
+                                self.addWin.destroy()
 
-                    # add button
-                    self.all_button = Button(self.addWin, text='ADD', command=query_update)
-                    self.all_button.place(relx=0.5, rely=0.7)
-                    self.ID_entry.focus_force()
+                        # add button
+                        self.all_button = Button(self.addWin, text='ADD', command=query_update)
+                        self.all_button.place(relx=0.5, rely=0.7)
+                        self.ID_entry.focus_force()
+
+                    else:
+                        messagebox.showerror("WRONG ID", "PUT THE CORRECT PRODUCT ID")
+
+
 
                 else:
-                    messagebox.showerror("WRONG ID", "PUT THE CORRECT PRODUCT ID")
-
-            else:
-                messagebox.showerror("WRONG ID", "ID NOT FOUND")
+                    messagebox.showerror("WRONG ID", "ID NOT FOUND")
 
         except Exception as e:
             messagebox.showwarning("ERROR", f"error: {e}")
@@ -1391,4 +1398,4 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
 
 
 
-CashierWin(Tk(), ID='RZ0000E005')  # debug for one cashier_win.py
+# CashierWin(Tk(), ID='RZ0000E005')  # debug for one cashier_win.py

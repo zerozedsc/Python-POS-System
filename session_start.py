@@ -113,7 +113,7 @@ class SessionChoice():
         self.printReport_button.place(relx=0.15, rely=0.4, height=50)
 
         # ID GRAB
-        self.grabbedID = ID
+        self.grabbedID = ID.upper()
         self.grabbedPOS = POS
         self.grabbedTime = datetime.now()
         if self.grabbedID != '':
@@ -124,7 +124,7 @@ class SessionChoice():
             self.sessionTemp.close()
 
         Label(self.sessionWin, text='ID: ', font=('Comic sans ms', 15, 'bold')).place(relx=0.35, rely=0.1)
-        self.sessionID_Label = Label(self.sessionWin, text=ID, font=('Comic sans ms', 15, 'bold'), foreground='green')
+        self.sessionID_Label = Label(self.sessionWin, text=ID.upper(), font=('Comic sans ms', 15, 'bold'), foreground='green')
         self.sessionID_Label.place(relx=0.42, rely=0.1)
 
         self.sessionWin.mainloop()
@@ -234,95 +234,97 @@ class SessionChoice():
         # pprint(query) #debug
 
         try:
-            self.adjust = sd.askstring('REGISTER ITEM', f'PRODUCT ID ')
+            self.adjust = sd.askstring('REGISTER ITEM', 'PRODUCT ID ')
+
+            if self.adjust is None:
+                pass
+            else:
+                for i in query:
+                    if self.adjust.upper() in i:
+                        check_productID = self.adjust.upper()
+                        break
+
+                if self.adjust.upper() in check_productID:
+                    if "RZ" and 'P' in self.adjust.upper() or len(self.adjust) >= 10:
+                        self.addWin = Toplevel(self.sessionWin)
+                        self.addWin.resizable(0, 0)
+                        self.windowHeight = int(self.addWin.winfo_reqheight())
+                        self.windowWidth = int(self.addWin.winfo_reqwidth())
+                        self.positionRight = int(self.addWin.winfo_screenwidth() / 2 - (self.windowWidth / 2))
+                        self.positionDown = int(self.addWin.winfo_screenheight() / 2 - (self.windowHeight / 2))
+                        self.addWin.iconphoto(False, PhotoImage(file='images/rozeriya.png'))
+                        self.addWin.geometry(f"400x200+{self.positionRight - 400}+{self.positionDown - 300}")
+                        self.addWin.title("ADD ITEM")
+
+                        Label(self.addWin, text="REGISTER ITEM", font=('comic sans ms', 18, 'italic', 'bold')).pack()
+
+                        self.getQtyA = IntVar()
+                        qty_before = 0
+
+                        # ID DISABLED
+                        Label(self.addWin, text='PRODUCT ID', font=('Comic sans ms', 12, 'normal', 'italic')).place(
+                            relx=0,
+                            rely=0.2)
+                        reg_entry = Label(self.addWin, font=('Comic sans ms', 12, 'normal', 'italic'),
+                                          text=self.adjust)
+                        reg_entry.place(relx=0.38, rely=0.2, width=240)
+
+                        # NAME
+                        Label(self.addWin, text='PRODUCT NAME',
+                              font=('Comic sans ms', 12, 'normal', 'italic')).place(relx=0, rely=0.35)
+                        self.name_entry = Entry(self.addWin, state='disabled')
+
+                        for k in query:
+                            if self.adjust.upper() in k:
+                                self.name_entry.config(state='normal')
+                                self.name_entry.insert(0, k[1])
+                                qty_before = int(k[4])
+                                Label(self.addWin, text=f'QUANTITY NOW: {qty_before}',
+                                      font=('Comic sans ms', 12, 'normal', 'italic')).place(relx=0, rely=0.48)
+                                self.name_entry.config(state='disabled')
+                                break
+                        self.name_entry.place(relx=0.38, rely=0.35, width=240)
+
+                        # QUANTITY
+                        Label(self.addWin, text='ADD STOCK',
+                              font=('Comic sans ms', 12, 'normal', 'italic')).place(relx=0, rely=0.6)
+                        self.qty_entry = Entry(self.addWin, textvariable=self.getQtyA)
+                        self.qty_entry.place(relx=0.38, rely=0.6, width=240)
+
+                        def query_update():
+                            ID = self.adjust.upper()
+
+                            if str(self.getQtyA.get()).isdigit():
+                                STOCK = qty_before + int(self.getQtyA.get())
+                            else:
+                                STOCK = qty_before
+                                messagebox.showerror("Number Only", "Number only except")
+
+                            try:
+                                cursor.execute("""UPDATE PRODUCT_DATA
+                                                                                                                                SET QUANTITY = ?
+                                                                                                                               WHERE 
+                                                                                                                                       PRODUCT_ID = ?""",
+                                               (STOCK, ID))
+                                conn.commit()
+                                messagebox.showinfo("SUCCESS", f"ADD INTO {ID} DONE")
+                                self.addWin.destroy()
 
 
-            for i in query:
-                if self.adjust.upper() in i:
-                    check_productID = self.adjust.upper()
-                    break
+                            except (Exception, sqlite3.Error) as error:
+                                messagebox.showerror("FAILED", f"error: {error}")
+                                self.addWin.destroy()
 
-            if self.adjust.upper() in check_productID:
-                if "RZ" and 'P' in self.adjust.upper() or len(self.adjust) >= 10:
-                    self.addWin = Toplevel(self.sessionWin)
-                    self.addWin.resizable(0, 0)
-                    self.windowHeight = int(self.addWin.winfo_reqheight())
-                    self.windowWidth = int(self.addWin.winfo_reqwidth())
-                    self.positionRight = int(self.addWin.winfo_screenwidth() / 2 - (self.windowWidth / 2))
-                    self.positionDown = int(self.addWin.winfo_screenheight() / 2 - (self.windowHeight / 2))
-                    self.addWin.iconphoto(False, PhotoImage(file='images/rozeriya.png'))
-                    self.addWin.geometry(f"400x200+{self.positionRight - 400}+{self.positionDown - 300}")
-                    self.addWin.title("ADD ITEM")
+                        # add button
+                        self.all_button = Button(self.addWin, text='ADD', command=query_update)
+                        self.all_button.place(relx=0.5, rely=0.7)
 
-                    Label(self.addWin, text="REGISTER ITEM", font=('comic sans ms', 18, 'italic', 'bold')).pack()
-
-
-                    self.getQtyA = IntVar()
-                    qty_before = 0
-
-                    # ID DISABLED
-                    Label(self.addWin, text='PRODUCT ID', font=('Comic sans ms', 12, 'normal', 'italic')).place(
-                        relx=0,
-                        rely=0.2)
-                    reg_entry = Label(self.addWin, font=('Comic sans ms', 12, 'normal', 'italic'),
-                                      text=self.adjust)
-                    reg_entry.place(relx=0.38, rely=0.2, width=240)
-
-                    # NAME
-                    Label(self.addWin, text='PRODUCT NAME',
-                          font=('Comic sans ms', 12, 'normal', 'italic')).place(relx=0, rely=0.35)
-                    self.name_entry = Entry(self.addWin, state='disabled')
-
-                    for k in query:
-                        if self.adjust.upper() in k:
-                            self.name_entry.config(state='normal')
-                            self.name_entry.insert(0, k[1])
-                            qty_before = int(k[4])
-                            Label(self.addWin, text=f'QUANTITY NOW: {qty_before}',
-                                  font=('Comic sans ms', 12, 'normal', 'italic')).place(relx=0, rely=0.48)
-                            self.name_entry.config(state='disabled')
-                            break
-                    self.name_entry.place(relx=0.38, rely=0.35, width=240)
-
-                    # QUANTITY
-                    Label(self.addWin, text='ADD STOCK',
-                          font=('Comic sans ms', 12, 'normal', 'italic')).place(relx=0, rely=0.6)
-                    self.qty_entry = Entry(self.addWin, textvariable=self.getQtyA)
-                    self.qty_entry.place(relx=0.38, rely=0.6, width=240)
-
-                    def query_update():
-                        ID = self.adjust.upper()
-
-                        if str(self.getQtyA.get()).isdigit():
-                            STOCK = qty_before + int(self.getQtyA.get())
-                        else:
-                            STOCK = qty_before
-                            messagebox.showerror("Number Only", "Number only except")
-
-                        try:
-                            cursor.execute("""UPDATE PRODUCT_DATA
-                                                                                                                            SET QUANTITY = ?
-                                                                                                                           WHERE 
-                                                                                                                                   PRODUCT_ID = ?""",
-                                       (STOCK, ID))
-                            conn.commit()
-                            messagebox.showinfo("SUCCESS", f"ADD INTO {ID} DONE")
-                            self.addWin.destroy()
-
-
-                        except (Exception, sqlite3.Error) as error:
-                            messagebox.showerror("FAILED", f"error: {error}")
-                            self.addWin.destroy()
-
-                    # add button
-                    self.all_button = Button(self.addWin, text='ADD', command=query_update)
-                    self.all_button.place(relx=0.5, rely=0.7)
+                    else:
+                        messagebox.showerror("WRONG ID", "PUT THE CORRECT PRODUCT ID")
 
                 else:
-                    messagebox.showerror("WRONG ID", "PUT THE CORRECT PRODUCT ID")
+                    messagebox.showerror("WRONG ID", "ID NOT FOUND")
 
-            else:
-                messagebox.showerror("WRONG ID", "ID NOT FOUND")
 
         except Exception as e:
             messagebox.showwarning("ERROR", f"error: {e}")

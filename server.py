@@ -3,8 +3,6 @@ import psycopg2
 from tkinter.ttk import *
 import random
 from tkinter import *
-import time
-from datetime import datetime
 import tkinter as tk
 import sqlite3
 
