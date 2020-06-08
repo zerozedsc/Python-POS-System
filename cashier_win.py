@@ -1398,5 +1398,5 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
 #TODO small bug for code1
 
 
-CashierWin(Tk(), ID='RZ0000E005')  # debug for one cashier_win.py
+# CashierWin(Tk(), ID='RZ0000E005')  # debug for one cashier_win.py
 
