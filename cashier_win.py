@@ -60,7 +60,7 @@ class CashierWin():
 
         # Cashier Name
         def name():
-            conn = sqlite3.connect(self.dbPath)
+            conn = sqlite3.connect(PATH)
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM EMPLOYEE_DATA ORDER BY EMPLOYEE_ID;")
             query1 = cursor.fetchall()
@@ -296,14 +296,6 @@ class CashierWin():
             # print("Directory ", dirname, " already exists")     #debug check dir exists
             pass
 
-        self.filename = dirname + "/" + str(self.n + 1) + ".txt"  # "//Zerozed-pc/shared/DB/temp/resit.txt"
-        if not os.path.exists(os.path.dirname(self.filename)):
-            try:
-                os.makedirs(os.path.dirname(self.filename))
-            except OSError as exc:  # Guard against race condition
-                if exc.errno != errno.EEXIST:
-                    raise
-
         if self.counting == True:
             self.n = self.n + 1
             self.p = self.p + 1
@@ -351,6 +343,14 @@ class CashierWin():
                 self.p = 0
             self.sellID = 'RZ' + str(self.k) + 'S' + str(self.p) + "\n"
         self.counting = True
+
+        self.filename = dirname + "/" + str(self.sellID) + ".txt"  # "//Zerozed-pc/shared/DB/temp/resit.txt"
+        if not os.path.exists(os.path.dirname(self.filename)):
+            try:
+                os.makedirs(os.path.dirname(self.filename))
+            except OSError as exc:  # Guard against race condition
+                if exc.errno != errno.EEXIST:
+                    raise
 
         # print(self.n, '', self.sellID)
 
@@ -1043,6 +1043,7 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
                 if str(k[0]) in str(i[0]):
                     if base[base.index(i)][5] == 0:
                         base[base.index(i)][5] = float(k[1])
+            base[base.index(i)][4] = float(base[base.index(i)][4]) - float(base[base.index(i)][5])
 
             self.buyScreen.insert("", END, value=i)
 
@@ -1390,4 +1391,4 @@ item\t          Qty    S/Price    Amount"""  # 2/slash
 
 
 
-# CashierWin(Tk(), ID='RZ0000E005')  # debug for one cashier_win.py
+CashierWin(Tk(), ID='RZ0000E005')  # debug for one cashier_win.py

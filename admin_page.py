@@ -13,6 +13,7 @@ import os
 from sys import exit
 import psycopg2
 import time
+import babel
 from server import SERVER_PATH
 
 #Path
@@ -296,7 +297,7 @@ class AdminWin():
                 cursor.execute("INSERT INTO REGISTER_CACHE VALUES(?,?,?)", (reg_id, ID, self.timestamp))
                 conn.commit()
                 messagebox.showinfo("SUCCESS", f"REGISTER {ID} DONE")
-                self.reg_itemWin.destroy
+                self.reg_itemWin.destroy()
             except:
                 messagebox.showerror("FAILED", "ID ALREADY REGISTERED")
 
@@ -780,7 +781,7 @@ class AdminWin():
                                            (promote, up_salary , self.empProfile))
                             conn.commit()
                             cursor.execute("""UPDATE EMPLOYEE
-                                                                                                                        SET EMPLOYEE_POS = ?.
+                                                                                                                        SET EMPLOYEE_POS = ?,
                                                                                                                                 SALARY = ?
                                                                                                                         WHERE EMPLOYEE_ID = ?""",
                                            (promote, up_salary ,self.empProfile))
@@ -811,7 +812,7 @@ class AdminWin():
                                           (promote, up_salary, self.empProfile))
                             conn.commit()
                             cursor.execute("""UPDATE EMPLOYEE
-                                                                                                                                                    SET EMPLOYEE_POS = ?.
+                                                                                                                                                    SET EMPLOYEE_POS = ?,
                                                                                                                                                             SALARY = ?
                                                                                                                                                     WHERE EMPLOYEE_ID = ?""",
                                            (promote, up_salary, self.empProfile))
@@ -1167,6 +1168,7 @@ class AdminWin():
                         getPhone = IntVar()
                         getPhoto = StringVar()
                         getSalary = IntVar()
+                        getPhone.set(60)
                         self.getPhotoBlobAdj = ''
 
                         def empPhoto():
@@ -1187,7 +1189,6 @@ class AdminWin():
                                 foo.save(os.path.abspath(pathName), quality=100)
                             except:
                                 print("exited") #debug
-
 
                         def query_emp():
                             ID = self.adjustEMP.upper()

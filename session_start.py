@@ -8,6 +8,7 @@ from datetime import datetime, date
 import os
 import tkcalendar
 import sqlite3
+import babel
 from pprint import pprint
 from server import SERVER_PATH
 
