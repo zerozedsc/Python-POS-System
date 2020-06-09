@@ -12,6 +12,7 @@ from tkinter import messagebox
 from tkinter.ttk import *
 from tkinter.ttk import Style
 import tkcalendar
+import pyttsx3 as tts
 from pprint import pprint
 import openpyxl as pyxl
 import xlrd
@@ -52,11 +53,19 @@ class CashierWin():
         self.buy = []
         self.counting = True
         self.cache_code2 = []
+        self.cache_code1 = []
         self.memberDeal = []
         self.calcChoice = True
         self.dealDiscount = 0
         self.memberDiscount = 0
         self.showDiscount = 0
+
+        # TTS
+        self.engine = tts.init()
+        voices = self.engine.getProperty('voices')
+        self.engine.setProperty('voice', voices[1].id)
+        rate = self.engine.getProperty('rate')
+        self.engine.setProperty('rate', 120)
 
         # Cashier Name
         def name():
@@ -79,7 +88,6 @@ class CashierWin():
                 namelbl.place(relx=0, rely=0.041)
             except (Exception, sqlite3.Error) as error:
                 messagebox.showerror('ERROR', error + ' Please contact Service Team')
-
 
         # product detail
         def productDetail(*args):
@@ -359,8 +367,8 @@ class CashierWin():
         # print(self.n, '', self.sellID)
 
         def insertData():
-            intro = """ROZERIYA ENTERPRISE\nLOT 1784 KG RAHMAT 18000\nKUALA KRAI, KELANTAN\nTERIMA KASIH KERANA MEMBELI DENGAN KAMI""" + \
-                    "\n__________________________________________________________________" \
+            intro = """ROZERIYA ENTERPRISE\nTEL +60172208214""" + \
+                    "\n__________________________________________________________" \
                     ""
             resitComp = """__________________________________\n
 item\t       Qty   S/Price   Total  Off"""  # 2/slash
@@ -415,6 +423,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                     payFrame_bg.place(x=0, y=0, relwidth=1, relheight=1)
 
                     def cash():
+
                         filename = self.filename  # "//Zerozed-pc/shared/DB/temp/resit.txt"
                         if not os.path.exists(os.path.dirname(filename)):
                             try:
@@ -431,13 +440,16 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                                                    state='enabled')
                         self.payCash_entry.place(relx=0.25, rely=0.35, height=30, width=200)
                         self.payCash_entry.focus_set()
+                        self.engine.say(f"Your Total is RM {self.actualTotal}")
+                        self.engine.runAndWait()
 
                         def a(*args):
                             if self.getCash.get() >= self.actualTotal:
                                 calcChange = round(self.getCash.get(), 2) - self.actualTotal
                                 self.totalPrice.config(state='normal', yscrollcommand=self.scrollbarPrice.set)
-                                self.totalPrice.insert(INSERT, f"CASH \t=RM{self.getCash.get()}\n")
-                                self.totalPrice.insert(INSERT, f"CHANGE\t=RM{round(calcChange, 2)}\n")
+                                self.totalPrice.insert(INSERT, f"CASH \t=\tRM{self.getCash.get()}\n")
+                                self.totalPrice.insert(INSERT, f"CHANGE\t=\tRM{round(calcChange, 2)}\n")
+                                self.totalPrice.insert(INSERT, f"\nTerima Kasih")
                                 self.totalGet = self.totalPrice.get(1.0, END)
                                 self.totalPrice.config(state='disabled', yscrollcommand=self.scrollbarPrice.set)
                                 with open(filename, "a") as f:
@@ -446,7 +458,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                                 self.totalCmd()
                                 self.payWin.destroy()
                                 self.saveExcel()  # save at excel
-                                self.cache_code2 = []
+                                self.cache_code2.clear()
                                 self.d = 0
                                 self.fix_count = 0
                                 self.totalMoney = self.totalMoney + self.actualTotal
@@ -547,6 +559,8 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                     os.startfile(rf"{printfile}", 'print')
                 except Exception as error:
                     messagebox.showerror("Printer error", error)
+                self.engine.say("Thank you for buying, and please come again")
+                self.engine.runAndWait()
             else:
                 # print("not sent to the printer")    #debug not sent to the Printer
                 self.outputArea.config(state='normal')
@@ -557,6 +571,8 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                 for i in self.buyScreen.get_children():
                     self.buyScreen.delete(i)
                 self.totalPrice.config(state='disabled', yscrollcommand=self.scrollbarPrice.set)
+                self.engine.say("Thank you for buying, and please come again")
+                self.engine.runAndWait()
 
         self.ID_entry.focus_set()
         self.updateDb()
@@ -628,8 +644,8 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
             n = n + i
         self.actualTotal = totalPrice - calcRounding - self.dealDiscount
         self.totalPrice.insert(INSERT, f"\nTAX: {n} %\n")
-        self.totalPrice.insert(INSERT, f"DISCOUNT =-RM{self.dealDiscount}\n")
-        self.totalPrice.insert(INSERT, f"TOTAL\t=RM{round(self.actualTotal, 2)}\n")
+        self.totalPrice.insert(INSERT, f"DISCOUNT =\t-RM{self.dealDiscount}\n")
+        self.totalPrice.insert(INSERT, f"TOTAL\t=\tRM{round(self.actualTotal, 2)}\n")
         # self.totalPrice.insert(INSERT, f"MEMBER ID:{self.memberCard()}\n")
         self.totalPrice.config(state='disabled', yscrollcommand=self.scrollbarPrice.set)
 
@@ -841,7 +857,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
             #@ BELI X DAPAT Y
             def CODE1():
                 try:
-                    if 'BELI' in str(rawValue[6]) and 'DAPAT' in str(rawValue[6]):
+                    if 'BELI' in str(rawValue[6]) and 'MANA' in str(rawValue[6]) and 'DAPAT' in str(rawValue[6]):
                         # print("CODE 1")   #debug Check Code
                         rawItem = [self.getPrdID.get(), self.productName, str(self.getPrdQty.get()),
                                    str(round(float(self.getPrdPrice.get()), 2)),
@@ -874,16 +890,57 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                         # if getType == []:
                         #     print(False)
                         n = 0
+                        search_x = 0
                         for i in range(0, len(getType)):
                             if len(getType) > n:
+                                print('buy 3 :', getType[n + 1])
                                 p = p + int(getType[n + 1])
                                 n = n + 4
+
                         x = int(rawValue[3])
                         y = float(rawValue[4])
                         toDiscount = (p - (p % x))
-                        code1Discount = (toDiscount / x) * ((float(getType[2]) * x) - y)
+                        if toDiscount == 0:
+                            self.cache_code1.append([self.getPrdID.get(), self.getPrdQty.get()])
+                            for i in self.cache_code1:
+                                search_x += int(i[1])
+                                print(search_x)
+                                if search_x > x:
+                                    toDiscount = (search_x - (search_x % x))
+                                    code1Discount = (toDiscount / x) * ((float(getType[2]) * x) - y)
+                                    self.showDiscount = code1Discount
+                                    self.cache_code1.clear()
+                                    self.cache_code1.append([self.getPrdID.get(), search_x-x])
+                                if search_x == x:
+                                    toDiscount = (search_x - (search_x % x))
+                                    code1Discount = (toDiscount / x) * ((float(getType[2]) * x) - y)
+                                    self.showDiscount = code1Discount
+                                    self.cache_code1.clear()
+                        elif toDiscount == p:
+                            code1Discount = (toDiscount / x) * ((float(getType[2]) * x) - y)
+                            self.showDiscount = code1Discount
+                        else:
+                            self.cache_code1.append([self.getPrdID.get(), p])
+                            for i in self.cache_code1:
+                                search_x += int(i[1])
+                                print(search_x)
+                                if search_x > x:
+                                    toDiscount = (search_x - (search_x % x))
+                                    code1Discount = (toDiscount / x) * ((float(getType[2]) * x) - y)
+                                    self.showDiscount = code1Discount
+                                    self.cache_code1.clear()
+                                    self.cache_code1.append([self.getPrdID.get(), search_x-x])
+                                if search_x == x:
+                                    toDiscount = (search_x - (search_x % x))
+                                    code1Discount = (toDiscount / x) * ((float(getType[2]) * x) - y)
+                                    self.showDiscount = code1Discount
+                                    self.cache_code1.clear()
+
+                        print(self.cache_code1)
+                        # print(f"n {n}, p {p}, x {x}, y {y}")
+                        # print(f"Discount: {code1Discount}, toDiscount: {toDiscount}")
                         # print(code1Discount,'BELI ' + str(x) ,'DAPAT ' + str(y))  #debug Tell About The Code
-                        self.showDiscount = code1Discount
+
                     else:
                         # print("find 1 else")   #debug
                         pass
@@ -1390,7 +1447,6 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
         validate.pack()
 
 
-
 #TODO add order window and function
 #TODO will use and research for DELIVERY_FLOW
 #TODO use FLOW_CACHE
@@ -1398,5 +1454,5 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
 #TODO small bug for code1
 
 
-# CashierWin(Tk(), ID='RZ0000E005')  # debug for one cashier_win.py
+CashierWin(Tk(), ID='RZ0000E005')  # debug for one cashier_win.py
 

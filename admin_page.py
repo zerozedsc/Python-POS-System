@@ -11,9 +11,7 @@ from tkinter.ttk import Style
 from PIL import Image, ImageTk
 import os
 from sys import exit
-import psycopg2
 import time
-import babel
 from server import SERVER_PATH
 
 #Path
