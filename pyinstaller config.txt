@@ -1,2 +1,14 @@
 pyinstaller -F -i"icon.ico" -n "ROZERIYA IMS v2.0"  --hidden-import babel.numbers --windowed session_start.py
 pyinstaller -D -i"icon.ico" -n "ROZERIYA IMS v2.0"  --hidden-import babel.numbers --windowed session_start.py
+PyInstaller --hidden-import=pyttsx3.drivers --hidden-import=pyttsx3.drivers.dummy --hidden-import=pyttsx3.drivers.espeak --hidden-import=pyttsx3.drivers.nsss --hidden-import=pyttsx3.drivers.sapi5 --hidden-import=babel.numbers -D -i"icon.ico" -n "ROZERIYA IMS v2.0" --windowed session_start.py
+
+#debug
+pyinstaller -D -i"icon.ico" -n "ROZERIYA IMS v2.0"  --hidden-import babel.numbers session_start.py
+pyinstaller -D -i"icon.ico" -n "ROZERIYA IMS v2.0"  --hidden-import babel.numbers,pyttsx3.drivers --specpath spec session_start.py
+pyinstaller -D -i"icon.ico" -n "ROZERIYA IMS v2.0"  --hidden-import pyttsx3.drivers,pyttsx3.drivers.dummy,pyttsx3.drivers.espeak,pyttsx3.drivers.nsss,pyttsx3.drivers.sapi5 session_start.py
+PyInstaller --hidden-import=pyttsx3.drivers --hidden-import=pyttsx3.drivers.dummy --hidden-import=pyttsx3.drivers.espeak --hidden-import=pyttsx3.drivers.nsss --hidden-import=pyttsx3.drivers.sapi5 --hidden-import=babel.numbers -D -i"icon.ico" -n "ROZERIYA IMS v2.0" session_start.py
+
+#debug with hook
+pyinstaller -D -i"icon.ico" -n "ROZERIYA IMS v2.0" --additional-hooks-dir=hook.py session_start.py
+
+

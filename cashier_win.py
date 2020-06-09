@@ -65,7 +65,7 @@ class CashierWin():
         voices = self.engine.getProperty('voices')
         self.engine.setProperty('voice', voices[1].id)
         rate = self.engine.getProperty('rate')
-        self.engine.setProperty('rate', 120)
+        self.engine.setProperty('rate', 150)
 
         # Cashier Name
         def name():
@@ -440,8 +440,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                                                    state='enabled')
                         self.payCash_entry.place(relx=0.25, rely=0.35, height=30, width=200)
                         self.payCash_entry.focus_set()
-                        self.engine.say(f"Your Total is RM {self.actualTotal}")
-                        self.engine.runAndWait()
+
 
                         def a(*args):
                             if self.getCash.get() >= self.actualTotal:
@@ -459,6 +458,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                                 self.payWin.destroy()
                                 self.saveExcel()  # save at excel
                                 self.cache_code2.clear()
+                                self.cache_code1.clear()
                                 self.d = 0
                                 self.fix_count = 0
                                 self.totalMoney = self.totalMoney + self.actualTotal
@@ -643,6 +643,8 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
         for i in tax.read():
             n = n + i
         self.actualTotal = totalPrice - calcRounding - self.dealDiscount
+        self.engine.say(f"Your Total is RM {self.actualTotal}")
+        self.engine.runAndWait()
         self.totalPrice.insert(INSERT, f"\nTAX: {n} %\n")
         self.totalPrice.insert(INSERT, f"DISCOUNT =\t-RM{self.dealDiscount}\n")
         self.totalPrice.insert(INSERT, f"TOTAL\t=\tRM{round(self.actualTotal, 2)}\n")
@@ -673,7 +675,8 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
         self.ID_entry.focus_set()
         self.counting = False
         self.fix_count = 0
-        self.cache_code2 = []
+        self.cache_code2.clear()
+        self.cache_code1.clear()
         try:
             for i in self.buyScreen.get_children():
                 self.buyScreen.delete(i)
@@ -865,7 +868,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                         getType = []  # [0] id, [1] quantity,[2] price ,[3] total
                         n = 0
                         p = 0
-
+                        print("code1")
                         for a in range(0, len(rawItem)):
                             if len(rawItem) > n:
                                 db.cursor.execute(f"SELECT * FROM PRODUCT WHERE PRODUCT_ID = '{rawItem[n]}'")
@@ -893,7 +896,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                         search_x = 0
                         for i in range(0, len(getType)):
                             if len(getType) > n:
-                                print('buy 3 :', getType[n + 1])
+                                # print('buy 3 :', getType[n + 1])
                                 p = p + int(getType[n + 1])
                                 n = n + 4
 
@@ -904,7 +907,6 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                             self.cache_code1.append([self.getPrdID.get(), self.getPrdQty.get()])
                             for i in self.cache_code1:
                                 search_x += int(i[1])
-                                print(search_x)
                                 if search_x > x:
                                     toDiscount = (search_x - (search_x % x))
                                     code1Discount = (toDiscount / x) * ((float(getType[2]) * x) - y)
@@ -923,7 +925,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                             self.cache_code1.append([self.getPrdID.get(), p])
                             for i in self.cache_code1:
                                 search_x += int(i[1])
-                                print(search_x)
+                                # print(search_x)
                                 if search_x > x:
                                     toDiscount = (search_x - (search_x % x))
                                     code1Discount = (toDiscount / x) * ((float(getType[2]) * x) - y)
@@ -936,7 +938,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                                     self.showDiscount = code1Discount
                                     self.cache_code1.clear()
 
-                        print(self.cache_code1)
+                        # print(self.cache_code1)
                         # print(f"n {n}, p {p}, x {x}, y {y}")
                         # print(f"Discount: {code1Discount}, toDiscount: {toDiscount}")
                         # print(code1Discount,'BELI ' + str(x) ,'DAPAT ' + str(y))  #debug Tell About The Code
@@ -1084,13 +1086,15 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
             base.append([self.buyScreen.item(child)["values"][i] for i in range(6)])
             self.buyScreen.delete(child)
 
-        for i in base:
-            for k in self.cache_code2:
-                if str(k[0]) in str(i[0]):
-                    if base[base.index(i)][5] == 0:
-                        base[base.index(i)][5] = float(k[1])
-                        self.cache_code2.pop(self.cache_code2.index(k))
+        print(self.cache_code2)
 
+        for i in base:
+            if 'end' in self.cache_code2[0]:
+                for k in self.cache_code2:
+                    if str(k[0]) in str(i[0]):
+                        if base[base.index(i)][5] == 0:
+                            base[base.index(i)][5] = float(k[1])
+                            self.cache_code2.pop(self.cache_code2.index(k))
 
             base[base.index(i)][4] = float(base[base.index(i)][4]) - float(base[base.index(i)][5])
 
@@ -1454,5 +1458,5 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
 #TODO small bug for code1
 
 
-# CashierWin(Tk(), ID='RZ0000E005')  # debug for one cashier_win.py
+CashierWin(Tk(), ID='RZ0000E005')  # debug for one cashier_win.py
 
