@@ -17,6 +17,7 @@ from pprint import pprint
 import openpyxl as pyxl
 import xlrd
 from openpyxl.styles import Alignment
+from win32api import GetSystemMetrics
 
 
 # server
@@ -28,12 +29,16 @@ class CashierWin():
         self.cashWin = master
         self.cashWin.resizable(0, 0)
         self.cashWin.protocol("WM_DELETE_WINDOW", False)
-        self.windowHeight = int(self.cashWin.winfo_reqheight())
-        self.windowWidth = int(self.cashWin.winfo_reqwidth())
+        self.windowHeight = int(GetSystemMetrics(1))    #y
+        if 800 < int(GetSystemMetrics(1)):
+            self.windowHeight = 800
+        self.windowWidth = int(GetSystemMetrics(0)) #x
+        if 1400 < int(GetSystemMetrics(0)):
+            self.windowWidth = 1400
         self.positionRight = int(self.cashWin.winfo_screenwidth() / 2 - (self.windowWidth / 2))
         self.positionDown = int(self.cashWin.winfo_screenheight() / 2 - (self.windowHeight / 2))
         self.cashWin.iconphoto(False, PhotoImage(file='images/rozeriya.png'))
-        self.cashWin.geometry(f"1400x800")
+        self.cashWin.geometry(f"{self.windowWidth}x{self.windowHeight}+{self.positionRight}+{self.positionDown}")  #1400x800
         self.cashWin.title("ADMIN FORM")
         style = Style()
         style.configure('W.TButton', font=('Comic sans ms', 15, 'normal', 'italic'), foreground='black')
@@ -79,9 +84,10 @@ class CashierWin():
                     for x in i:
                         name.append(str(x))
 
+
                 cashierName = 'NAME: ' + str(name[name.index(self.IDcashier.upper()) + 1])
-                nameLen = len(list(map(len, cashierName)))
-                wordLen = list(map(len, cashierName.split(" ")))
+                # nameLen = len(list(map(len, cashierName)))
+                # wordLen = list(map(len, cashierName.split(" ")))
 
                 namelbl = Label(self.cashWin, text=cashierName, font=('comic sans ms', 13, 'bold'),
                                 foreground='blue')
@@ -91,48 +97,67 @@ class CashierWin():
 
         # product detail
         def productDetail(*args):
-            conn = sqlite3.connect(self.dbPath)
+            conn = sqlite3.connect(PATH)
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM PRODUCT_DATA ORDER BY PRODUCT_ID;")
-            query1 = cursor.fetchall()
-            product = []
-            for i in query1:
-                for x in i:
-                    product.append(str(x))
-
             try:
-                self.Qty_entry.config(state='normal')
-                self.Price_entry.config(state='normal')
-                self.ID_entry.config(state='disabled')
-                self.cancelButton.config(state='normal')
-                self.Qty_entry.focus_set()
-                self.productName = str(product[product.index(self.getPrdID.get()) + 1])
-                self.namePrd = Label(self.cashWin, text="Product Name: " + self.productName + "                       ",
-                                     font=('comic sans ms', 15, 'bold'))
-                self.namePrd.place(relx=0, rely=0.4)
-                productQty = int(product[product.index(self.getPrdID.get()) + 4])
-                self.qtyPrd = Label(self.cashWin,
-                                    text="KUANTITI: " + str(productQty) + "     ",
-                                    font=('comic sans ms', 15, 'bold'))
-                if productQty <= 20:
-                    self.qtyPrd.config(foreground='red')
-                    messagebox.showwarning("Stok", "ISI STOK DENGAN SEGERA")
-                elif productQty <= 0:
+                cursor.execute(f"SELECT * FROM PRODUCT_DATA WHERE PRODUCT_ID={(self.getPrdID.get())};")
+                query1 = cursor.fetchall()
+                product = []
+                for i in query1:
+                    for x in i:
+                        product.append(str(x))
+                # print(product)
 
-                    self.qtyPrd.config(foreground='red')
-                    messagebox.showwarning("Stok", "ITEM SUDAH KEHABISAN STOK")
-                self.qtyPrd.place(relx=0, rely=0.45)
-                productPrice = float(product[product.index(self.getPrdID.get()) + 3])
-                self.getPrdPrice.set(productPrice)
+                try:
+                    self.Qty_entry.config(state='normal')
+                    self.Price_entry.config(state='normal')
+                    self.ID_entry.config(state='disabled')
+                    self.cancelButton.config(state='normal')
+                    self.Qty_entry.focus_set()
+                    self.productName = str(product[product.index(self.getPrdID.get()) + 1])
+                    self.namePrd = Label(self.cashWin,
+                                         text="Product Name: " + self.productName + "                       ",
+                                         font=('comic sans ms', 15, 'bold'))
+                    self.namePrd.place(relx=0, rely=0.4)
+                    productQty = int(product[product.index(self.getPrdID.get()) + 4])
+                    self.qtyPrd = Label(self.cashWin,
+                                        text="KUANTITI: " + str(productQty) + "     ",
+                                        font=('comic sans ms', 15, 'bold'))
+                    if productQty <= 20:
+                        self.qtyPrd.config(foreground='red')
+                        messagebox.showwarning("Stok", "ISI STOK DENGAN SEGERA")
+                    elif productQty <= 0:
 
-            except:
+                        self.qtyPrd.config(foreground='red')
+                        messagebox.showwarning("Stok", "ITEM SUDAH KEHABISAN STOK")
+                    self.qtyPrd.place(relx=0, rely=0.45)
+                    productPrice = float(product[product.index(self.getPrdID.get()) + 3])
+                    self.getPrdPrice.set(productPrice)
+                    self.printIntro = True
+
+
+                except Exception as e:
+                    self.getPrdID.set('')
+                    self.Qty_entry.config(state='disabled')
+                    self.Price_entry.config(state='disabled')
+                    self.ID_entry.config(state='normal')
+                    self.cancelButton.config(state='disabled')
+                    self.printIntro = False
+                    messagebox.showerror("ERROR PRODUCT ID 1", f"""PRODUCT ID NOT FOUND OR ENTRY EMPTY\n({e})""")
+                    self.ID_entry.focus_force()
+
+                self.cashWin.bind("<Return>", self.insertBuy)
+
+            except Exception as e:
                 self.getPrdID.set('')
                 self.Qty_entry.config(state='disabled')
                 self.Price_entry.config(state='disabled')
                 self.ID_entry.config(state='normal')
                 self.cancelButton.config(state='disabled')
-                messagebox.showerror("ERROR", "PRODUCT ID NOT FOUND OR ENTRY EMPTY")
+                self.printIntro = False
+                messagebox.showerror("ERROR PRODUCT ID 2", f"""PRODUCT ID NOT FOUND OR ENTRY EMPTY\n({e})""")
                 self.ID_entry.focus_force()
+
 
         # background
         background_image = tk.PhotoImage(master=self.cashWin, file='images/cashierbg.png')
@@ -156,7 +181,7 @@ class CashierWin():
         self.timelbl.after(1, self.updateTime)
 
         # DATE
-        Label(self.cashWin, text='DATE: ' + datetime.now().strftime("%d/%b/%Y"), font=('comic sans ms', 13, 'bold'),
+        Label(self.cashWin, text='DATE: ' + self.dateNow, font=('comic sans ms', 13, 'bold'),
               foreground='black').place(relx=0.6, rely=0.005)
 
         # back button
@@ -169,19 +194,19 @@ class CashierWin():
 
         # total button
         self.totalButton = Button(self.cashWin, text='TOTAL', style=style1, command=self.payWindow)
-        self.totalButton.place(relx=0.5, rely=0.95)
+        self.totalButton.place(relx=0.48, rely=0.94)
 
         # cancel sale button
         self.cancelSaleButton = Button(self.cashWin, text='SALE CANCEL', style=style1, command=self.saleCancel)
-        self.cancelSaleButton.place(relx=0.5, rely=0.85)
+        self.cancelSaleButton.place(relx=0.48, rely=0.85)
 
         # print report button
         self.printReportButton = Button(self.cashWin, text='REPORT', style=style1, command=self.printExcel)
-        self.printReportButton.place(relx=0.5, rely=0.65)
+        self.printReportButton.place(relx=0.48, rely=0.65)
 
         # add stock button
         self.printReportButton = Button(self.cashWin, text='ADD STOCK', style=style1, command=self.addStockWindow)
-        self.printReportButton.place(relx=0.5, rely=0.45)
+        self.printReportButton.place(relx=0.48, rely=0.45)
 
         # Intro
         self.scrollbar = Scrollbar(self.cashWin)
@@ -263,11 +288,27 @@ class CashierWin():
         self.Price_entry.bind("<FocusIn>", a)
 
         self.ID_entry.bind("<Return>", productDetail)
-        self.cashWin.bind("<Return>", self.insertBuy)
+
+
 
         # cancel button
         self.cancelButton = Button(self.cashWin, text='cancel', command=self.cancel, state='disabled')
         self.cancelButton.place(relx=0.35, rely=0.32)
+
+        try:
+            with open('Config/cashierWindowCache.ini', 'r') as cache:
+                check_cache = [i.strip("\n") for i in cache.readlines()]
+                if str(self.dateNow) == check_cache[0]:
+                    if check_cache[1] != self.totalMoney and check_cache[2] != self.n:
+                        self.totalMoney = float(check_cache[1])
+                        self.n = self.p = int(check_cache[2])
+
+                cache.close()
+        except:
+            pass
+
+
+
 
         # buy count and total money
         Label(self.cashWin, text="TOTAL TODAY: RM" + str(self.totalMoney), font=('comic sans ms', 15, 'bold')).place(
@@ -290,10 +331,7 @@ class CashierWin():
             else:
                 messagebox.showwarning("EMPTY", "EMPTY ENTRY OR MEMBER ID EXIST")
 
-
-
         self.member_entry.bind("<Return>", c)
-
 
         self.cashWin.mainloop()
 
@@ -308,9 +346,11 @@ class CashierWin():
             # print("Directory ", dirname, " already exists")     #debug check dir exists
             pass
 
-        if self.counting == True:
+
+        if self.counting:
             self.n = self.n + 1
             self.p = self.p + 1
+
         self.outputArea.config(state='normal', yscrollcommand=self.scrollbar.set)
         conn = sqlite3.connect(PATH)
         cursor = conn.cursor()
@@ -367,12 +407,13 @@ class CashierWin():
         # print(self.n, '', self.sellID)
 
         def insertData():
-            intro = """ROZERIYA ENTERPRISE\nTEL +60172208214""" + \
+            intro = """ROZERIYA ENTERPRISE\nTEL +6017 959 3309""" + \
                     "\n__________________________________________________________" \
                     ""
             resitComp = """__________________________________\n
 item\t       Qty   S/Price   Total  Off"""  # 2/slash
 
+            self.outputArea.config(state='normal', yscrollcommand=self.scrollbar.set)
             self.outputArea.insert(1.0, intro, 'CENTER')
             date = f"DATE&TIME: {str(self.dateNow)} {str(time.strftime('%H:%M:%S%p'))} \n"
             self.outputArea.insert(INSERT, "")
@@ -448,7 +489,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                                 self.totalPrice.config(state='normal', yscrollcommand=self.scrollbarPrice.set)
                                 self.totalPrice.insert(INSERT, f"CASH \t=\tRM{self.getCash.get()}\n")
                                 self.totalPrice.insert(INSERT, f"CHANGE\t=\tRM{round(calcChange, 2)}\n")
-                                self.totalPrice.insert(INSERT, f"\nTerima Kasih")
+                                self.totalPrice.insert(INSERT, f"\nTERIMA KASIH • SILA DATANG LAGI ")
                                 self.totalGet = self.totalPrice.get(1.0, END)
                                 self.totalPrice.config(state='disabled', yscrollcommand=self.scrollbarPrice.set)
                                 with open(filename, "a") as f:
@@ -465,6 +506,11 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                                 Label(self.cashWin, text="TOTAL TODAY: RM" + str(self.totalMoney),
                                       font=('comic sans ms', 15, 'bold')).place(
                                     relx=0.6, rely=0.15)
+
+                                with open('Config/cashierWindowCache.ini', 'w+') as cache:
+                                    cache.write(f"""{self.dateNow}\n{self.totalMoney}\n{self.n}""")  # date,totalMoney, n
+                                    cache.close()
+
                             else:
                                 messagebox.showwarning("less cash", "cash is not enough")
                                 self.payWin.lift(aboveThis=self.cashWin)
@@ -508,7 +554,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                 else:
                     messagebox.showwarning("SALE INPUT", "NO SALE INPUT TO TOTAL")
             except:
-                messagebox.showwarning("SALE INPUT", "NO SALE INPUT TO TOTAL")
+                messagebox.showwarning("PAYING", "CANNOT PAY")
 
         try:
             for i in self.buyScreen.get_children():
@@ -534,7 +580,6 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                 # print(self.memberDeal)    #debug
                 self.fixBuyScreen()
                 paying()
-
 
             else:
                 messagebox.showwarning("SALE INPUT", "NO SALE INPUT TO TOTAL Else")
@@ -588,7 +633,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
     def insertBuy(self, *args):
         self.showDiscount = 0
         try:
-            if self.printIntro is True:
+            if self.printIntro:
                 self.receiptIntro()
                 self.printIntro = False
             if self.getPrdQty.get() != 0 and self.getPrdID != '':
@@ -635,7 +680,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
         else:
             a = '-'
         self.totalPrice.config(state='normal', yscrollcommand=self.scrollbarPrice.set)
-        self.totalPrice.insert(INSERT, f"\nSUBTOTAL: \tRM{totalPrice}\n")
+        self.totalPrice.insert(INSERT, f"\nSUBTOTAL(+OFF): \tRM{totalPrice}\n")
         self.totalPrice.insert(INSERT, f"ROUNDING:\tRM{a}{calcRounding}\n")
         self.totalPrice.insert(INSERT, "========================================\n ")
         tax = open("data/tax.cfg")
@@ -643,7 +688,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
         for i in tax.read():
             n = n + i
         self.actualTotal = totalPrice - calcRounding - self.dealDiscount
-        self.engine.say(f"Your Total is RM {self.actualTotal}")
+        self.engine.say(f"Your Total is {self.actualTotal} Ringgit")
         self.engine.runAndWait()
         self.totalPrice.insert(INSERT, f"\nTAX: {n} %\n")
         self.totalPrice.insert(INSERT, f"DISCOUNT =\t-RM{self.dealDiscount}\n")
@@ -868,7 +913,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                         getType = []  # [0] id, [1] quantity,[2] price ,[3] total
                         n = 0
                         p = 0
-                        print("code1")
+
                         for a in range(0, len(rawItem)):
                             if len(rawItem) > n:
                                 db.cursor.execute(f"SELECT * FROM PRODUCT WHERE PRODUCT_ID = '{rawItem[n]}'")
@@ -1030,9 +1075,6 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                             else:
                                 pass
 
-
-
-
                     else:
                         # print("find 2 else")    #debug
                         pass
@@ -1057,6 +1099,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
             # print(catch_data)
 
             for i in rawValue:
+                # print(rawValue)
                 if catch_data[2] in i:
                     if self.cache_code2 == []:
                         self.cache_code2.append([catch_data[2], 0])
@@ -1082,19 +1125,19 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
     def fixBuyScreen(self):
         base = []
         calc_disc = []
+
         for child in self.buyScreen.get_children():
             base.append([self.buyScreen.item(child)["values"][i] for i in range(6)])
             self.buyScreen.delete(child)
 
-        print(self.cache_code2)
-
         for i in base:
-            if 'end' in self.cache_code2[0]:
-                for k in self.cache_code2:
-                    if str(k[0]) in str(i[0]):
-                        if base[base.index(i)][5] == 0:
-                            base[base.index(i)][5] = float(k[1])
-                            self.cache_code2.pop(self.cache_code2.index(k))
+            if self.cache_code2 != []:
+                if 'end' in self.cache_code2[0]:
+                    for k in self.cache_code2:
+                        if str(k[0]) in str(i[0]):
+                            if base[base.index(i)][5] == 0:
+                                base[base.index(i)][5] = float(k[1])
+                                self.cache_code2.pop(self.cache_code2.index(k))
 
             base[base.index(i)][4] = float(base[base.index(i)][4]) - float(base[base.index(i)][5])
 
@@ -1114,6 +1157,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
 
         for child1 in self.buyScreen.get_children():
             calc_disc.append([self.buyScreen.item(child1)["values"][i] for i in range(6)])
+
 
         for k in calc_disc:
             with open(self.filename, "a") as f:
@@ -1145,6 +1189,10 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
 
     def backChoice(self):
         # print("Back") #debug
+        with open('Config/cashierWindowCache.ini', 'w+') as cache:
+            cache.write(f"""{self.dateNow}\n{self.totalMoney}\n{self.n}""") # date,totalMoney, n
+            cache.close()
+
         self.checkExcel()
         self.saveExit()
         from session_start import SessionStart
@@ -1153,6 +1201,10 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
         return start_choice
 
     def exitWindow(self):
+        with open('Config/cashierWindowCache.ini', 'w+') as cache:
+            cache.write(f"""{self.dateNow}\n{self.totalMoney}\n{self.n}""") # date,totalMoney, n
+            cache.close()
+
         self.checkExcel()
         self.saveExit()
         exit()
@@ -1253,10 +1305,9 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
 
             k = 0
             for data in base:
-                row_adj = str(find_cell(value=data[k], show='row'))
+                row_adj = str(find_cell(value=str(data[k]), show='row'))
                 if row_adj == 'None':
-                    add_cell(value=[str(data[0]), data[1], data[2], float(data[4]) - float(data[5]),
-                                    (float(data[4]) - float(data[5])) / float(data[2])])
+                    add_cell(value=[str(data[0]), data[1], data[2], float(data[4]) , float(data[4]) / float(data[2])])
                 else:
                     currentSheet[qty_adj + row_adj].value = int(currentSheet[qty_adj + row_adj].value) + int(data[2])
                     currentSheet[total_adj + row_adj].value = float(
@@ -1350,10 +1401,6 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
             theFile.save(EXCEL_FILE)
             theFile.close()
 
-
-
-
-
         except Exception as e:
             messagebox.showerror("ERROR", f"{e} . PLS CONTACT PROVIDER TO FIX IT")
 
@@ -1420,6 +1467,8 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
 
             if os.path.exists(os.path.abspath(EXCEL_FILE)):
                 printfile = os.path.abspath(EXCEL_FILE)
+                self.checkExcel()
+                self.saveExit()
                 try:
                     os.startfile(rf"{printfile}", 'print')
                     self.calendar_win.destroy()
@@ -1458,5 +1507,5 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
 #TODO small bug for code1
 
 
-CashierWin(Tk(), ID='RZ0000E005')  # debug for one cashier_win.py
+# CashierWin(Tk(), ID='RZ0000E005')  # debug for one cashier_win.py
 
