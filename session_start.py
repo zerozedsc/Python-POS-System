@@ -9,6 +9,7 @@ import os
 import tkcalendar
 import sqlite3
 from pprint import pprint
+import win32print
 from server import SERVER_PATH
 
 
@@ -196,6 +197,15 @@ class SessionChoice():
             if os.path.exists(os.path.abspath(EXCEL_FILE)):
                 printfile = os.path.abspath(EXCEL_FILE)
                 try:
+                    try:
+                        with open('Config/printerConfig.ini', 'r') as f:
+                            check_print = [i.strip("\n") for i in f.readlines()]
+                            win32print.SetDefaultPrinter(str(check_print[3]))
+                            f.close()
+                    except Exception as e:
+                        messagebox.showerror("Printer Error",
+                                             f"Cant Print, Please contact service provider +60179593309\n{e}")
+
                     os.startfile(rf"{printfile}", 'print')
                     self.calendar_win.destroy()
                     messagebox.showinfo("Printing", f"Report on {get_date} Printed Successfully")

@@ -6,7 +6,10 @@ from tkinter import *
 import tkinter as tk
 import sqlite3
 
+
 SERVER_PATH = '//Zerozed-pc/shared/DB/ROZERIYA-DB.db'
+COUNTMAX = 10000
+LENMAX = 7
 
 class Server():
     def __init__(self):
@@ -85,5 +88,7 @@ class ServerDisplay():
             self.found.place(relx=0, rely=0.6)
 
             self.serverWin.after(3000, self.callInternet)
+
+
 
 # ServerDisplay().serverWin.mainloop()

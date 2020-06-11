@@ -18,10 +18,13 @@ import openpyxl as pyxl
 import xlrd
 from openpyxl.styles import Alignment
 from win32api import GetSystemMetrics
+import win32print
+
 
 
 # server
 from server import SERVER_PATH as PATH
+from server import COUNTMAX, LENMAX
 
 
 class CashierWin():
@@ -47,10 +50,7 @@ class CashierWin():
         # Setup Var
         self.IDcashier = ID.upper()
         self.dateNow = datetime.now().strftime("%d/%b/%Y")
-        self.n = 0
-        self.k = 0
-        self.p = 0
-        self.d = 0
+        self.n = self.k = self.p = self.d = 0
         self.dbPath = PATH
         self.totalMoney = 0
         self.totalBuy = 0
@@ -133,8 +133,8 @@ class CashierWin():
                     self.qtyPrd.place(relx=0, rely=0.45)
                     productPrice = float(product[product.index(self.getPrdID.get()) + 3])
                     self.getPrdPrice.set(productPrice)
-                    self.printIntro = True
-
+                    if len(self.outputArea.get("1.0", END)) == 1:
+                        self.printIntro = True
 
                 except Exception as e:
                     self.getPrdID.set('')
@@ -142,11 +142,10 @@ class CashierWin():
                     self.Price_entry.config(state='disabled')
                     self.ID_entry.config(state='normal')
                     self.cancelButton.config(state='disabled')
-                    self.printIntro = False
+                    if self.printIntro:
+                        self.printIntro = False
                     messagebox.showerror("ERROR PRODUCT ID 1", f"""PRODUCT ID NOT FOUND OR ENTRY EMPTY\n({e})""")
                     self.ID_entry.focus_force()
-
-                self.cashWin.bind("<Return>", self.insertBuy)
 
             except Exception as e:
                 self.getPrdID.set('')
@@ -154,7 +153,8 @@ class CashierWin():
                 self.Price_entry.config(state='disabled')
                 self.ID_entry.config(state='normal')
                 self.cancelButton.config(state='disabled')
-                self.printIntro = False
+                if self.printIntro:
+                    self.printIntro = False
                 messagebox.showerror("ERROR PRODUCT ID 2", f"""PRODUCT ID NOT FOUND OR ENTRY EMPTY\n({e})""")
                 self.ID_entry.focus_force()
 
@@ -288,6 +288,7 @@ class CashierWin():
         self.Price_entry.bind("<FocusIn>", a)
 
         self.ID_entry.bind("<Return>", productDetail)
+        self.cashWin.bind("<Return>", self.insertBuy)
 
 
 
@@ -301,8 +302,13 @@ class CashierWin():
                 if str(self.dateNow) == check_cache[0]:
                     if check_cache[1] != self.totalMoney and check_cache[2] != self.n:
                         self.totalMoney = float(check_cache[1])
-                        self.n = self.p = int(check_cache[2])
+                        self.n = int(check_cache[2])
 
+                self.z = int(check_cache[3])
+                if self.z >= COUNTMAX:
+                    messagebox.askokcancel("Maintenance Required",
+                                                         "You need a maintenance, Pls Call Service Team at +60172208214")
+                    self.cashWin.destroy()
                 cache.close()
         except:
             pass
@@ -348,8 +354,8 @@ class CashierWin():
 
 
         if self.counting:
-            self.n = self.n + 1
-            self.p = self.p + 1
+            self.n += 1
+
 
         self.outputArea.config(state='normal', yscrollcommand=self.scrollbar.set)
         conn = sqlite3.connect(PATH)
@@ -361,39 +367,21 @@ class CashierWin():
             for x in i:
                 name.append(str(x))
 
-        cashierName = 'NAME: ' + str(name[name.index(self.IDcashier) + 1])
-        nameLen = len(list(map(len, cashierName)))
-        wordLen = list(map(len, cashierName.split(" ")))
-        # print(wordLen)
-        # print(self.n, self.p, self.k)
-        self.sellID = 'RZ0000S00' + str(self.p)
-        if self.n >= 10:
-            self.sellID = 'RZ0000S0' + str(self.p)
-        if self.n >= 100:
-            self.sellID = 'RZ0000S' + str(self.p)
-            if self.p == 1000:
-                self.k = self.k + 1
-                self.p = 0
-        if self.n >= 1000:
-            if self.p == 1000:
-                self.k = self.k + 1
-                self.p = 0
-            self.sellID = 'RZ000' + str(self.k) + 'S' + str(self.p)
-        if self.n >= 10000:
-            if self.p == 1000:
-                self.k = self.k + 1
-                self.p = 0
-            self.sellID = 'RZ00' + str(self.k) + 'S' + str(self.p)
-        if self.n >= 100000:
-            if self.p == 1000:
-                self.k = self.k + 1
-                self.p = 0
-            self.sellID = 'RZ0' + str(self.k) + 'S' + str(self.p)
-        if self.n >= 100000:
-            if self.p == 1000:
-                self.k = self.k + 1
-                self.p = 0
-            self.sellID = 'RZ' + str(self.k) + 'S' + str(self.p) + "\n"
+        if self.z >= COUNTMAX:
+            self.cashWin.destroy()
+        elif self.z >= 1000:
+            grab_z = str(self.z)
+            self.sellID = f"RZ{grab_z[0]}{grab_z[1]}S{grab_z[2]}{grab_z[3]}"
+        elif self.z >= 100:
+            grab_z = str(self.z)
+            self.sellID = f"RZ0{grab_z[0]}S{grab_z[1]}{grab_z[2]}"
+        elif self.z >= 10:
+            self.sellID = 'RZ00S' + str(self.z)
+        else:
+            self.sellID = 'RZ00S0' + str(self.z)
+
+        if len(self.sellID) > LENMAX:
+            self.cashWin.destroy()
         self.counting = True
 
         self.filename = dirname + "/" + str(self.sellID) + ".txt"  # "//Zerozed-pc/shared/DB/temp/resit.txt"
@@ -413,7 +401,7 @@ class CashierWin():
             resitComp = """__________________________________\n
 item\t       Qty   S/Price   Total  Off"""  # 2/slash
 
-            self.outputArea.config(state='normal', yscrollcommand=self.scrollbar.set)
+
             self.outputArea.insert(1.0, intro, 'CENTER')
             date = f"DATE&TIME: {str(self.dateNow)} {str(time.strftime('%H:%M:%S%p'))} \n"
             self.outputArea.insert(INSERT, "")
@@ -508,7 +496,8 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                                     relx=0.6, rely=0.15)
 
                                 with open('Config/cashierWindowCache.ini', 'w+') as cache:
-                                    cache.write(f"""{self.dateNow}\n{self.totalMoney}\n{self.n}""")  # date,totalMoney, n
+                                    self.z += 1
+                                    cache.write(f"""{self.dateNow}\n{self.totalMoney}\n{self.n}\n{self.z}""")  # date,totalMoney, n
                                     cache.close()
 
                             else:
@@ -601,6 +590,15 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                     self.buyScreen.delete(i)
                 printfile = os.path.abspath(self.filename)
                 try:
+                    try:
+                        with open('Config/printerConfig.ini', 'r') as f:
+                            check_print = [i.strip("\n") for i in f.readlines()]
+                            win32print.SetDefaultPrinter(str(check_print[1]))
+                            # print(win32print.GetDefaultPrinter())
+                            f.close()
+                    except Exception as e:
+                        messagebox.showerror("Printer Error" ,f"Cant Print, Please contact service provider +60179593309\n{e}")
+
                     os.startfile(rf"{printfile}", 'print')
                 except Exception as error:
                     messagebox.showerror("Printer error", error)
@@ -717,6 +715,11 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                 n = n + 2
 
     def saleCancel(self):
+        try:
+            self.payWin.destroy()
+        except:
+            pass
+
         self.ID_entry.focus_set()
         self.counting = False
         self.fix_count = 0
@@ -938,7 +941,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                         # if getType == []:
                         #     print(False)
                         n = 0
-                        search_x = 0
+
                         for i in range(0, len(getType)):
                             if len(getType) > n:
                                 # print('buy 3 :', getType[n + 1])
@@ -948,46 +951,60 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                         x = int(rawValue[3])
                         y = float(rawValue[4])
                         toDiscount = (p - (p % x))
+                        # if p < x, Save in self.cache_code1, Next Calc until found discount
                         if toDiscount == 0:
                             self.cache_code1.append([self.getPrdID.get(), self.getPrdQty.get()])
-                            for i in self.cache_code1:
-                                search_x += int(i[1])
-                                if search_x > x:
-                                    toDiscount = (search_x - (search_x % x))
-                                    code1Discount = (toDiscount / x) * ((float(getType[2]) * x) - y)
-                                    self.showDiscount = code1Discount
-                                    self.cache_code1.clear()
-                                    self.cache_code1.append([self.getPrdID.get(), search_x-x])
-                                if search_x == x:
-                                    toDiscount = (search_x - (search_x % x))
-                                    code1Discount = (toDiscount / x) * ((float(getType[2]) * x) - y)
-                                    self.showDiscount = code1Discount
-                                    self.cache_code1.clear()
+                            # print("P<X", self.cache_code1, len(self.cache_code1))
+                            code1Discount = 0
+                            check_discount = 0
+                            rangeA = len(self.cache_code1)
+                            if rangeA > 1:
+                                for g in range(rangeA):
+                                    check_discount += self.cache_code1[g][1]
+                                    if check_discount > x:
+                                        check_discount = x
+                                    if check_discount % x == 0:
+                                        code1Discount += ((float(getType[2]) * x) - y)
+                                        check_discount = self.cache_code1[g][1] - x
+                                self.cache_code1.clear()
+                                if check_discount > 0:
+                                    self.cache_code1.append([self.getPrdID.get(), check_discount])
+
+                            self.showDiscount = code1Discount
+                        # If toDiscount == p which mean equal to x, normal calculate
                         elif toDiscount == p:
+                            # print("0", self.cache_code1)
                             code1Discount = (toDiscount / x) * ((float(getType[2]) * x) - y)
                             self.showDiscount = code1Discount
+                        # if p > x, Reminder save into cache
                         else:
-                            self.cache_code1.append([self.getPrdID.get(), p])
-                            for i in self.cache_code1:
-                                search_x += int(i[1])
-                                # print(search_x)
-                                if search_x > x:
-                                    toDiscount = (search_x - (search_x % x))
-                                    code1Discount = (toDiscount / x) * ((float(getType[2]) * x) - y)
-                                    self.showDiscount = code1Discount
-                                    self.cache_code1.clear()
-                                    self.cache_code1.append([self.getPrdID.get(), search_x-x])
-                                if search_x == x:
-                                    toDiscount = (search_x - (search_x % x))
-                                    code1Discount = (toDiscount / x) * ((float(getType[2]) * x) - y)
-                                    self.showDiscount = code1Discount
-                                    self.cache_code1.clear()
+                            # print("P>X", self.cache_code1)
+                            code1Discount = 0
+                            check_discount = 0
+                            for c in range(1, p):
+                                if c%x == 0:
+                                    code1Discount += ((float(getType[2]) * x) - y)
+                                    # print(code1Discount)
+                            self.cache_code1.append([self.getPrdID.get(),p%x])
+                            rangeA = len(self.cache_code1)
+                            if rangeA > 1:
+                                for i in range(rangeA):
+                                    check_discount += self.cache_code1[i][1]
+                                    if check_discount > x:
+                                        check_discount = x
+                                    if check_discount%x == 0:
+                                        code1Discount += (toDiscount / x) * ((float(getType[2]) * x) - y)
+                                        check_discount = self.cache_code1[i][1] - x
+                                self.cache_code1.clear()
+                                if check_discount > 0:
+                                    self.cache_code1.append([self.getPrdID.get(), check_discount])
 
-                        # print(self.cache_code1)
+                            self.showDiscount = code1Discount
+
+
                         # print(f"n {n}, p {p}, x {x}, y {y}")
                         # print(f"Discount: {code1Discount}, toDiscount: {toDiscount}")
                         # print(code1Discount,'BELI ' + str(x) ,'DAPAT ' + str(y))  #debug Tell About The Code
-
                     else:
                         # print("find 1 else")   #debug
                         pass
@@ -1026,7 +1043,6 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                                         getType.append(rawItem[n + 4])  # prd total
 
                                 n = n + 5
-
                         # print(getType)    #debug
                         n = 0
                         for i in range(0, len(getType)):
@@ -1034,15 +1050,13 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                                 p += int(getType[n + 1])
                                 n = n + 4
 
-
                         k = 0
                         x = int(rawValue[3])
                         y = float(rawValue[4])
 
-
                         for c in self.cache_code2:
-                            # print('RUN FOR ', type)
                             if type in c:
+                                # print('RUN FOR ', type, c, self.cache_code2.index(c))
                                 if self.cache_code2[self.cache_code2.index(c)][1] == 'end':
                                     k = k + (float(getType[2]) - y)
                                     toDiscount = k * int(getType[1])
@@ -1050,12 +1064,8 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                                     self.showDiscount = toDiscount
                                     # self.dealDiscount += toDiscount
                                     break
-
                                 else:
-
                                     self.cache_code2[self.cache_code2.index(c)][1] += int(getType[1])
-
-
 
                                 if p >= x or int(self.cache_code2[self.cache_code2.index(c)][1]) >= x:
                                     k = k + (float(getType[2]) - y)
@@ -1072,8 +1082,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                                     self.cache_code2.append([self.getPrdID.get(), k*int(getType[1])])
                                     break
 
-                            else:
-                                pass
+
 
                     else:
                         # print("find 2 else")    #debug
@@ -1087,7 +1096,6 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
             CODE1()
             CODE2()
 
-
         try:
             db.cursor.execute(f"SELECT * FROM DEAL")
             db.conn.commit()
@@ -1098,31 +1106,25 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
             # print(rawValue)   #debug
             # print(catch_data)
 
-            for i in rawValue:
-                # print(rawValue)
-                if catch_data[2] in i:
-                    if self.cache_code2 == []:
-                        self.cache_code2.append([catch_data[2], 0])
-                    for cache in self.cache_code2:
-                        if catch_data[2] in cache:
-                            break
-                        else:
-                            self.cache_code2.append([catch_data[2], 0])
-                            break
+            if self.cache_code2 == []:
+                for i in rawValue:
+                    self.cache_code2.append([i[1], 0])
 
-                    # print("found", self.cache_code2)
-                    checkDeals(i[0], catch_data[2])
-                    break
+
+            # print("found", self.cache_code2)
+
+            for i in rawValue:
+                checkDeals(i[0], catch_data[2])
+            # print(self.cache_code2)
 
                 #TODO Need to fix more, slack everywhere
-
-
-
 
         except Exception as e:
             messagebox.showerror("ERROR", f"ERROR: {e}")
 
     def fixBuyScreen(self):
+        from data.callDB import callDB
+        db = callDB()
         base = []
         calc_disc = []
 
@@ -1130,16 +1132,24 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
             base.append([self.buyScreen.item(child)["values"][i] for i in range(6)])
             self.buyScreen.delete(child)
 
-        for i in base:
-            if self.cache_code2 != []:
-                if 'end' in self.cache_code2[0]:
-                    for k in self.cache_code2:
-                        if str(k[0]) in str(i[0]):
-                            if base[base.index(i)][5] == 0:
-                                base[base.index(i)][5] = float(k[1])
-                                self.cache_code2.pop(self.cache_code2.index(k))
 
-            base[base.index(i)][4] = float(base[base.index(i)][4]) - float(base[base.index(i)][5])
+        if self.cache_code2 != []:
+            # print(self.cache_code2)
+            for cache in self.cache_code2:
+                if 'end' in cache:
+                    for one in base:
+                        db.cursor.execute(f"SELECT * FROM PRODUCT_DATA WHERE PRODUCT_ID = '{one[0]}'")
+                        db.conn.commit()
+                        catch_data = db.cursor.fetchone()
+                        if cache[0] == catch_data[2]:
+                            if base[base.index(one)][5] == 0:
+                                for check_cache in self.cache_code2:
+                                    if check_cache[0] == str(one[0]):
+                                        if base[base.index(one)][5] == 0:
+                                            base[base.index(one)][5] = float(check_cache[1])
+                                            self.cache_code2.pop(self.cache_code2.index(check_cache))
+
+                        base[base.index(one)][4] = float(base[base.index(one)][4]) - float(base[base.index(one)][5])
 
         for g in base:
             for p in base:
@@ -1185,12 +1195,14 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
         self.getPrdID.set('')
         self.getPrdPrice.set(0)
         self.getPrdQty.set(0)
+
+
         # print("destroy")  #debug
 
     def backChoice(self):
         # print("Back") #debug
         with open('Config/cashierWindowCache.ini', 'w+') as cache:
-            cache.write(f"""{self.dateNow}\n{self.totalMoney}\n{self.n}""") # date,totalMoney, n
+            cache.write(f"""{self.dateNow}\n{self.totalMoney}\n{self.n}\n{self.z}""") # date,totalMoney, n
             cache.close()
 
         self.checkExcel()
@@ -1202,7 +1214,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
 
     def exitWindow(self):
         with open('Config/cashierWindowCache.ini', 'w+') as cache:
-            cache.write(f"""{self.dateNow}\n{self.totalMoney}\n{self.n}""") # date,totalMoney, n
+            cache.write(f"""{self.dateNow}\n{self.totalMoney}\n{self.n}\n{self.z}""") # date,totalMoney, n
             cache.close()
 
         self.checkExcel()
@@ -1470,6 +1482,14 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
                 self.checkExcel()
                 self.saveExit()
                 try:
+                    try:
+                        with open('Config/printerConfig.ini', 'r') as f:
+                            check_print = [i.strip("\n") for i in f.readlines()]
+                            win32print.SetDefaultPrinter(str(check_print[3]))
+                            f.close()
+                    except Exception as e:
+                        messagebox.showerror("Printer Error" ,f"Cant Print, Please contact service provider +60179593309\n{e}")
+
                     os.startfile(rf"{printfile}", 'print')
                     self.calendar_win.destroy()
                     messagebox.showinfo("Printing", f"Report on {get_date} Printed Successfully")
@@ -1507,5 +1527,5 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
 #TODO small bug for code1
 
 
-# CashierWin(Tk(), ID='RZ0000E005')  # debug for one cashier_win.py
+# CashierWin(Tk(), ID='RZ0000E001')  # debug for one cashier_win.py
 
