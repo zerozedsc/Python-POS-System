@@ -2,23 +2,21 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0b89bc54-e3fb-4bec-89e3-06c862b89736" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Config/cashierWindowCache.ini" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Config/printerConfig.ini" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Config/cashDrawerCode.ini" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Config/checkWindow.ini" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Config/drawer_open.bat" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Config/info.conf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Security_Note.cfg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/cashierWindowCache.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/cashierWindowCache.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/sessionStart.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/sessionStart.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/admin_page.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/auth_page.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cashier_win.py" beforeDir="false" afterPath="$PROJECT_DIR$/cashier_win.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/barcode data/barcode (10).jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/barcode data/barcode (11).jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/barcode data/barcode (12).jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/barcode data/barcode (13).jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/barcode data/barcode (14).jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/barcode data/barcode (15).jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/barcode data/barcode (4).jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/barcode data/barcode (5).jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/barcode data/barcode (6).jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/barcode data/barcode (7).jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/barcode data/barcode (8).jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/barcode data/barcode (9).jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/barcode data/f10.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/Employee Data/Employee_Photos/RZ0000E005.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/barcode data/PUTERI AYU.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyinstaller config.txt" beforeDir="false" afterPath="$PROJECT_DIR$/pyinstaller config.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/server.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/session_start.py" beforeDir="false" afterPath="$PROJECT_DIR$/session_start.py" afterDir="false" />
     </list>
@@ -49,7 +47,7 @@
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../ROZERIYA IMS v2.0 (Alpha Release Test)/cashier_win.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../I.M.S v1.0/admin_page.py" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -57,27 +55,6 @@
     </key>
   </component>
   <component name="RunManager" selected="Python.cashier_win">
-    <configuration name="admin_page" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="Inventory Management System" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/admin_page.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="cashier_win" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Inventory Management System" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -99,7 +76,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="drawer_open" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Inventory Management System" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -107,11 +84,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../../Python Learn/tts" />
-      <option name="IS_MODULE_SDK" value="false" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Config" />
+      <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../../Python Learn/tts/main.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Config/drawer_open.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -120,7 +97,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="server" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="drawer_open.pyw" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Inventory Management System" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Config" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Config/drawer_open.pyw" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="session_start" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Inventory Management System" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -132,7 +130,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/server.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/session_start.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -165,10 +163,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.cashier_win" />
+        <item itemvalue="Python.session_start" />
         <item itemvalue="Python.test" />
-        <item itemvalue="Python.server" />
-        <item itemvalue="Python.main" />
-        <item itemvalue="Python.admin_page" />
+        <item itemvalue="Python.drawer_open" />
+        <item itemvalue="Python.drawer_open.pyw" />
       </list>
     </recent_temporary>
   </component>
@@ -214,34 +212,34 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="513" y="30" key="CommitChangelistDialog2/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1591619402911" />
-    <state x="696" y="223" key="FileChooserDialogImpl" timestamp="1591856827172">
+    <state x="696" y="223" key="FileChooserDialogImpl" timestamp="1591927331736">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="696" y="223" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1591856827172" />
-    <state width="550" height="653" key="GridCell.Tab.0.bottom" timestamp="1591858229534">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state x="696" y="223" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1591927331736" />
+    <state width="589" height="398" key="GridCell.Tab.0.bottom" timestamp="1592985516812">
+      <screen x="1920" y="-282" width="900" height="1560" />
     </state>
-    <state width="458" height="718" key="GridCell.Tab.0.bottom/0.0.1600.860@0.0.1600.860" timestamp="1584112050736" />
-    <state width="550" height="653" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1591858229534" />
-    <state width="550" height="476" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1600.860@1920.0.1600.860" timestamp="1591696227720" />
-    <state width="550" height="653" key="GridCell.Tab.0.center" timestamp="1591858229533">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="589" height="398" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.-282.900.1560@1920.-282.900.1560" timestamp="1592985516812" />
+    <state width="469" height="898" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1592922911367" />
+    <state width="391" height="718" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1600.860@1920.0.1600.860" timestamp="1592131606118" />
+    <state width="589" height="398" key="GridCell.Tab.0.center" timestamp="1592985516812">
+      <screen x="1920" y="-282" width="900" height="1560" />
     </state>
-    <state width="458" height="718" key="GridCell.Tab.0.center/0.0.1600.860@0.0.1600.860" timestamp="1584112050736" />
-    <state width="550" height="653" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1591858229533" />
-    <state width="550" height="476" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1600.860@1920.0.1600.860" timestamp="1591696227720" />
-    <state width="550" height="653" key="GridCell.Tab.0.left" timestamp="1591858229533">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="589" height="398" key="GridCell.Tab.0.center/0.0.1920.1040/1920.-282.900.1560@1920.-282.900.1560" timestamp="1592985516812" />
+    <state width="469" height="898" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1592922911367" />
+    <state width="391" height="718" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1600.860@1920.0.1600.860" timestamp="1592131606118" />
+    <state width="589" height="398" key="GridCell.Tab.0.left" timestamp="1592985516811">
+      <screen x="1920" y="-282" width="900" height="1560" />
     </state>
-    <state width="458" height="718" key="GridCell.Tab.0.left/0.0.1600.860@0.0.1600.860" timestamp="1584112050736" />
-    <state width="550" height="653" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1591858229533" />
-    <state width="550" height="476" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1600.860@1920.0.1600.860" timestamp="1591696227720" />
-    <state width="550" height="653" key="GridCell.Tab.0.right" timestamp="1591858229533">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="589" height="398" key="GridCell.Tab.0.left/0.0.1920.1040/1920.-282.900.1560@1920.-282.900.1560" timestamp="1592985516811" />
+    <state width="469" height="898" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1592922911367" />
+    <state width="391" height="718" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1600.860@1920.0.1600.860" timestamp="1592131606118" />
+    <state width="589" height="398" key="GridCell.Tab.0.right" timestamp="1592985516812">
+      <screen x="1920" y="-282" width="900" height="1560" />
     </state>
-    <state width="458" height="718" key="GridCell.Tab.0.right/0.0.1600.860@0.0.1600.860" timestamp="1584112050736" />
-    <state width="550" height="653" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1591858229533" />
-    <state width="550" height="476" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1600.860@1920.0.1600.860" timestamp="1591696227720" />
+    <state width="589" height="398" key="GridCell.Tab.0.right/0.0.1920.1040/1920.-282.900.1560@1920.-282.900.1560" timestamp="1592985516812" />
+    <state width="469" height="898" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1592922911367" />
+    <state width="391" height="718" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1600.860@1920.0.1600.860" timestamp="1592131606118" />
     <state width="1881" height="341" key="GridCell.Tab.1.bottom" timestamp="1590679698046">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -258,18 +256,29 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1881" height="341" key="GridCell.Tab.1.right/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1590679698046" />
-    <state x="562" y="306" key="com.intellij.ide.util.TipDialog" timestamp="1591847629836">
+    <state x="562" y="306" key="com.intellij.ide.util.TipDialog" timestamp="1592958913004">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="468" y="253" key="com.intellij.ide.util.TipDialog/0.0.1600.860@0.0.1600.860" timestamp="1584172624699" />
-    <state x="562" y="306" key="com.intellij.ide.util.TipDialog/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1591847629836" />
+    <state x="562" y="306" key="com.intellij.ide.util.TipDialog/0.0.1920.1040/1920.-282.900.1560@0.0.1920.1040" timestamp="1592958913004" />
+    <state x="562" y="306" key="com.intellij.ide.util.TipDialog/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1592871556780" />
+    <state x="2388" y="253" key="com.intellij.ide.util.TipDialog/0.0.1920.1040/1920.0.1600.860@1920.0.1600.860" timestamp="1591946209456" />
     <state x="778" y="431" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1591619448444">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="778" y="431" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1591619448444" />
-    <state x="701" y="166" key="refactoring.ChangeSignatureDialog" timestamp="1590719662764">
+    <state x="701" y="166" key="refactoring.ChangeSignatureDialog" timestamp="1592875543105">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="701" y="166" key="refactoring.ChangeSignatureDialog/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1590719662764" />
+    <state x="701" y="166" key="refactoring.ChangeSignatureDialog/0.0.1920.1040/1920.0.1600.860@0.0.1920.1040" timestamp="1592875543105" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/cashier_win.py</url>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

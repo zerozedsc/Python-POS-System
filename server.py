@@ -1,5 +1,5 @@
 import urllib.request
-import psycopg2
+from tkinter import messagebox as msg
 from tkinter.ttk import *
 import random
 from tkinter import *
@@ -13,14 +13,13 @@ LENMAX = 7
 
 class Server():
     def __init__(self):
-
         try:
             self.conn = sqlite3.connect(SERVER_PATH)  # \\Zerozed-pc\shared\DB
             self.cursor = self.conn.cursor()
             print("YOU ARE CONNECTED TO -", "DATABASE" , "\n")
             self.test = True
-        except (Exception, psycopg2.Error) as error:
-            print("Error while connecting to PostgreSQL ", error)
+        except (Exception, sqlite3.Error) as error:
+            print("Error while connecting to Sqlite3 Database ", error)
             self.test = False
             self.found = error
 
@@ -28,8 +27,12 @@ class Server():
         try:
             urllib.request.urlopen(host)  # Python 3.x
             return True
-        except:
-            return False
+        except Exception as e:
+            internet_choice = msg.askyesno("Internet Not Connected", f"You Are not Connected to Internet, Continue? \n {e}")
+            if internet_choice:
+                return True
+            else:
+                return False
 
 
 class ServerDisplay():

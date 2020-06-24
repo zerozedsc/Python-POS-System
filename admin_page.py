@@ -15,7 +15,7 @@ import time
 from server import SERVER_PATH
 
 #Path
-EMPLOYEE_PHOTO_PATH = "data/Employee Data/Employee_Photos/"
+EMPLOYEE_PHOTO_PATH = "//Zerozed-pc/shared/DB/Employee_Photo/"
 
 class AdminWin():
     def __init__(self, master, ID='', POS=''):
@@ -603,7 +603,7 @@ class AdminWin():
             query2 = cursor.fetchall()
             product = []
             product_data = []
-            print("YOU ARE CONNECTED TO DATABASE")
+            # print("YOU ARE CONNECTED TO DATABASE")
             if data == 'employee':
                 for i in query1:
                     for x in i:
@@ -622,12 +622,11 @@ class AdminWin():
 
         except (Exception, sqlite3.Error) as error:
             self.check = False
-            print("Error while connecting to PostgreSQL ", error)
+            # print("Error while connecting to PostgreSQL ", error)
             messagebox.showerror("Database Error", error)
 
     def employeeProfile(self):
         self.empProfile = sd.askstring(title='ADJUST EMPLOYEE', prompt=f'ENTER SAME WITH THIS FORMAT exp:{self.emp_id}')
-
         if self.empProfile is None:
             pass
         else:
@@ -841,8 +840,8 @@ class AdminWin():
                         messagebox.showerror("WRONG ID", "PUT THE CORRECT PRODUCT ID")
                 else:
                     messagebox.showerror("ID NOT EXIST", "PUT ANOTHER ID")
-            except:
-                print("canceled")
+            except Exception as e:
+                print("canceled ", e)
 
     def showEmployee(self):
         show = Frame(master=self.adminWin)
@@ -870,84 +869,61 @@ class AdminWin():
         profileEmp_button.place(relx=0.2, rely=0.05)
 
         try:
-            employee = [i.strip(" ") for i in
-                        self.employeeQuery('employee')]  # PRODUCT_ID[0], PRODUCT_TYPE[1], EXIST[2]
-            employee_data = [i.strip(" ") for i in
-                             self.employeeQuery(
-                                 'employee_data')]  # PRODUCT_ID[0], PRODUCT_NAME[1], PRICE[2], QUANTITY[3]
+            conn = sqlite3.connect(SERVER_PATH)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM EMPLOYEE ORDER BY EMPLOYEE_ID;")
+            employee = cursor.fetchall()  # EMPLOYEE_ID[0], EMPLOYEE_POS[1], EXIST[2]
+            cursor.execute("SELECT * FROM EMPLOYEE_DATA ORDER BY EMPLOYEE_ID;")
+            employee_data = cursor.fetchall()    # EMPLOYEE_ID[0], NAME[1], EMPLOYEE_POS[2], ADDRESS[3], PHONE[4], SALARY[5]
 
         except:
             self.check = False
 
         if self.check:
-            if self.check:
-                self.check_employeeID = []
-                chk = 0
-                for i in employee:
-                    if len(employee) > chk:
-                        self.check_employeeID.append(employee[chk])
-                        chk = chk + 4
-                id_count = 1
-                self.emp_id_count = ''
-                for i in self.check_employeeID:
-                    id_count = id_count + 1
-                if id_count < 10:
-                    self.emp_id = "RZ0000E00" + str(id_count)
-                    self.emp_id_count = str(id_count)
-                elif id_count < 100:
-                    self.emp_id = "RZ0000E0" + str(id_count)
-                    self.emp_id_count = str(id_count)
-                else:
-                    self.emp_id = "RZ0000E" + str(id_count)
-                    self.emp_id_count = str(id_count)
-            self.e_id = []
-            self.pos = []
-            name = []
-            address = []
-            phone = []
-            salary = []
-            # print(employee)   #debug
-            # print(employee_data)  #debug
-            xt = 2
-            xd = 0
-            for i in employee_data:
-                if len(employee_data) > xd:
-                    self.e_id.append(employee_data[xd])
-                    xd = xd + 7
-                if len(employee_data) > xt:
-                    self.pos.append(employee_data[xt])
-                    xt = xt + 7
+            id_count = 1
+            for i in range(len(employee)):
+                    id_count +=1
 
-            yn = 1
-            yp = 3
-            yq = 4
-            yz = 5
-            for i in employee_data:
-                if len(employee_data) > yn:
-                    name.append(employee_data[yn])
-                    yn = yn + 7
-                if len(employee_data) > yp:
-                    address.append(employee_data[yp])
-                    yp = yp + 7
-                if len(employee_data) > yq:
-                    phone.append(employee_data[yq])
-                    yq = yq + 7
-                if len(employee_data) > yz:
-                    salary.append(employee_data[yz])
-                    yz = yz + 7
+            if id_count < 10:
+                    self.emp_id = "RZ0000E00" + str(id_count)
+            elif id_count < 100:
+                    self.emp_id = "RZ0000E0" + str(id_count)
+            elif id_count < 1000:
+                    self.emp_id = "RZ0000E" + str(id_count)
+            elif id_count < 10000:
+                k = int(id_count/1000)
+                # print(k)
+                if id_count%1000 < 10:
+                    self.emp_id = f"RZ000{k}E" + f"00{str(id_count%1000)}"
+                elif id_count%1000 < 100:
+                    self.emp_id = f"RZ000{k}E" + f"0{str(id_count%1000)}"
+                elif id_count%1000 < 1000:
+                    self.emp_id = f"RZ000{k}E" + f"{str(id_count%1000)}"
+
+            else:
+                    messagebox.showerror("MAX COUNT", "PLEASE CONTACT SERVICE PROVIDER +60197947051")
+                    self.adminWin.destroy()
+
 
             # DATA TABLE
             cols = ('ID', 'NAMA', 'JAWATAN', 'ALAMAT', 'NO.TELEFON', 'GAJI')
             self.data_table = Treeview(show, columns=cols, show='headings')
             for col in cols:
                 self.data_table.heading(col, text=col)
-            k = 0
-            for i in range(len(self.e_id)):
-                self.data_table.insert("", END,
+            for x in employee_data :
+                for k in employee:
+                    if x[0] == k[0]:
+                        if bool(k[2]):
+                            self.data_table.insert("", END,
                                        values=(
-                                           self.e_id[k], name[k], self.pos[k], address[k], int(phone[k]),
-                                           'RM ' + str(salary[k])))
-                k = k + 1
+                                           x[0], x[1], x[2], x[3], int(x[4]),
+                                           'RM ' + str(x[5])))
+                        break
+
+            self.check_employeeID = []
+            for child in self.data_table.get_children():
+                self.check_employeeID.append(self.data_table.item(child)["values"][0])
+
 
             self.data_table.place(relx=0.01, rely=0.1, relwidth=0.98, relheight=0.9)
             vsb = Scrollbar(show, orient="vertical", command=self.data_table.yview)
@@ -984,14 +960,10 @@ class AdminWin():
                         cursor = conn.cursor()
                         print("YOU ARE CONNECTED TO DATABASE")
                         try:
-                            cursor.execute(f"DELETE FROM EMPLOYEE_DATA WHERE EMPLOYEE_ID = '{getDel}'")
-                            conn.commit()
                             cursor.execute(f"UPDATE EMPLOYEE SET EXIST ={False} WHERE EMPLOYEE_ID = '{getDel}'")
                             conn.commit()
-                            pathName = "//Zerozed-pc/shared/DB/gambar_pekerja/" + deleteEMP + ".jpg"
-                            os.remove(pathName)
-                            self.showEmployee()
                             messagebox.showinfo("SUCCESS", f"{getDel} DELETED ")
+                            self.showEmployee()
                         except:
                             messagebox.showerror("FAILED", "ID NOT FOUND")
                     except (Exception, sqlite3.Error) as error:
@@ -1002,11 +974,7 @@ class AdminWin():
             print("CANCELED or Database not connected")
 
     def addEmployee(self):
-        try:
-            self.addEMP = sd.askstring(title='REGISTER EMPLOYEE', prompt=f'PRESS OK', initialvalue=self.emp_id)
-        except:
-            messagebox.showwarning("CAUTION", "YOU MUST PRESS SHOW EMPLOYEE FIRST")
-
+        self.addEMP = self.emp_id
         try:
             if self.addEMP not in self.check_employeeID:
                 if "RZ" and 'E' in self.addEMP and len(self.addEMP) >= 10:
@@ -1069,6 +1037,9 @@ class AdminWin():
                                     cursor.execute("INSERT INTO EMPLOYEE_DATA VALUES(?,?,?,?,?,?,?)",
                                                    (ID, NAMA, 'EMPLOYEE', ADDRESS, PHONE, SALARY, PHOTO))
                                     conn.commit()
+                                    cursor.execute("INSERT INTO EMPLOYEE_CACHE VALUES(?,?,?)",
+                                                   (ID, 0,0))
+                                    conn.commit()
                                     messagebox.showinfo("SUCCESS", f"REGISTER {ID} DONE")
                                     self.showEmployee()
                                     self.addEMPWin.destroy()
@@ -1124,14 +1095,14 @@ class AdminWin():
                         self.empAdd_button = Button(self.addEMPWin, style=style1, text='HIRE', command=query_emp,
                                                     state='normal')
                         self.empAdd_button.place(relx=0.5, rely=0.8)
-                    except:
-                        print("CANCELED")
+                    except Exception as e:
+                        print("CANCELED ", e)
                 else:
                     messagebox.showerror("WRONG ID", "PUT THE CORRECT PRODUCT ID")
             else:
                 messagebox.showerror("ID EXISTED", "PUT ANOTHER ID")
-        except:
-            print("CANCELED")
+        except Exception as e:
+            print("CANCELED ", e)
 
     def adjustEmployee(self):
         try:

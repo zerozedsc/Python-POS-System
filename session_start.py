@@ -14,8 +14,8 @@ from server import SERVER_PATH
 
 
 class SessionStart():
-    def checkServer(self):
-        server_start = Tk()
+    def checkServer(self, master):
+        server_start = master
         server_start.protocol("WM_DELETE_WINDOW", exit)
         from server import ServerDisplay
         serverDisplay = ServerDisplay(server_start)
@@ -81,6 +81,11 @@ class SessionChoice():
 
         self.swapUser = False
 
+        #Check Window Existed
+        with open('Config/checkWindow.ini', 'w+') as config:
+            config.write(str(True))
+            config.close()
+
         # background
         background_image = tk.PhotoImage(master=self.sessionWin, file='images/server.png')
         background_label = Label(self.sessionWin, background='gold', image=background_image)
@@ -100,7 +105,12 @@ class SessionChoice():
         self.admin.place(relx=0.35, rely=0.6, width=200, height=50)
 
         # EXIT Button
-        self.closeWin = Button(self.sessionWin, text='EXIT', style=style1, state='normal', command=exit)
+        def close():
+            with open('Config/checkWindow.ini', 'w+') as config:
+                config.write(str(False))
+                config.close()
+                exit()
+        self.closeWin = Button(self.sessionWin, text='EXIT', style=style1, state='normal', command=close)
         self.closeWin.place(relx=0.8, rely=0.85)
 
         # CHANGE USER BUTTON
@@ -123,8 +133,8 @@ class SessionChoice():
 {self.grabbedTime}""")
             self.sessionTemp.close()
 
-        Label(self.sessionWin, text='ID: ', font=('Comic sans ms', 15, 'bold')).place(relx=0.35, rely=0.1)
-        self.sessionID_Label = Label(self.sessionWin, text=ID.upper(), font=('Comic sans ms', 15, 'bold'), foreground='green')
+        Label(self.sessionWin, text='POS: ', font=('Comic sans ms', 15, 'bold')).place(relx=0.35, rely=0.1)
+        self.sessionID_Label = Label(self.sessionWin, text=POS.upper(), font=('Comic sans ms', 15, 'bold'), foreground='green')
         self.sessionID_Label.place(relx=0.42, rely=0.1)
 
         self.sessionWin.mainloop()
@@ -190,7 +200,8 @@ class SessionChoice():
 
 
         def print_report():
-            SAVE_PATH = 'data/Report Data/'
+            DIR_PATH = str(datetime.now().strftime("%B")) + f"_{datetime.now().year}/"
+            SAVE_PATH = '//Zerozed-pc/shared/DB/Sales_Report/' + DIR_PATH
             get_date = cal.selection_get()
             EXCEL_FILE = SAVE_PATH + str(get_date)  + '.xlsx'
 
@@ -218,7 +229,8 @@ class SessionChoice():
 
 
         def is_validate(event):
-            SAVE_PATH = 'data/Report Data/'
+            DIR_PATH = str(datetime.now().strftime("%B")) + f"_{datetime.now().year}/"
+            SAVE_PATH = '//Zerozed-pc/shared/DB/Sales_Report/' + DIR_PATH
             get_date = cal.selection_get()
             EXCEL_FILE = SAVE_PATH + str(get_date) + '.xlsx'
 
@@ -338,5 +350,44 @@ class SessionChoice():
         except Exception as e:
             messagebox.showwarning("ERROR", f"error: {e}")
 
+
+class FixWindow():
+    def __init__(self):
+        with open('Config/checkWindow.ini', 'w+') as cache:
+            try:
+                cache.write("False")
+                cache.close()
+                self.check_fix = True
+            except Exception as e:
+                self.check_fix = e
+
+    def bool(self):
+        return self.check_fix
+
+
+
+
 if __name__ == '__main__':
-    SessionStart().checkServer()
+    with open('Config/checkWindow.ini', 'r') as config:
+        check_config = [i.strip("\n") for i in config.readlines()]
+        config.close()
+        root = SessionStart()
+        if check_config[0] == "True":
+            root_engine = Tk()
+            messagebox.showwarning("Already Open", "Window Already Open")
+            fix_choice = messagebox.askyesno("PROBLEM", "Got Problem? Want to fix it?")
+            if fix_choice:
+                root_engine.destroy()
+                fix_window = FixWindow()
+                if fix_window.bool() is True:
+                    engine1 = Tk()
+                    root.checkServer(master=engine1)
+                else:
+                    messagebox.showerror("Fix Problem", f"Please Contact The Service Team for further Maintenance \n {fix_window.bool()}")
+
+        else:
+            engine1 = Tk()
+            root.checkServer(master=engine1)
+
+
+

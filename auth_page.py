@@ -88,6 +88,14 @@ class AuthDisplay():
 
     def IDscanner(self):
         self.ID_input = sd.askstring('EMPLOYEE ID', 'TAG YOUR ID')
+        de_hash = ''
+        for i in str(self.ID_input):
+            k = str(i)
+            if k == 'A' or k == 'X' or k == 'B' or k == 'C':
+                pass
+            else:
+                de_hash += k
+        self.ID_input = de_hash
         undetected = Label(self.authWin, text='ID: UNDETECTED', font=('comic sans ms', 18, 'italic', 'bold'),
                            background='silver', foreground='red')
         er = Label(self.authWin, text='Tekan Butang Sekali Lagi', font=('comic sans ms', 10, 'italic', 'bold'),
@@ -113,13 +121,12 @@ class AuthDisplay():
 
             # print(str(id_list)) #debug
             if self.ID_input != '' and not None:
-
                 if self.ID_input.upper() in id_list:
                     # print("EXIST")    # debug find existed acc
                     Label(self.authWin, text='                      ' ,
                           font=('comic sans ms', 18, 'italic', 'bold'),
                           background='silver', foreground='green').place(relx=0.3, rely=0.6)    #BLANK SPACE
-                    Label(self.authWin, text='ID: ' + self.ID_input.upper(),
+                    Label(self.authWin, text='ID: ' + 'Detected',
                           font=('comic sans ms', 18, 'italic', 'bold'),
                           background='silver', foreground='green').place(relx=0.3, rely=0.6)
 
@@ -162,6 +169,7 @@ class AuthDisplay():
                 undetected.place(relx=0.3, rely=0.6)
                 self.again_button.config(state='normal')
                 print("False")      #debug False Checked
+
         except AttributeError as error:
             er.place(relx=0.3, rely=0.6)
             self.again_button.config(state='normal')
@@ -209,6 +217,5 @@ class AuthDisplay():
 
 
 #TODO Make a window to show report who are log in with AUTH_MANAGER, AUTH_EMPLOYEE, AUTH_SUPERVISOR
-
 
 # AuthDisplay(Tk())
