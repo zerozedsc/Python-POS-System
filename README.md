@@ -10,7 +10,8 @@ Actually I try to make a database server but I did not know how to do that so I 
 to become a host for local network and the database is inside network folder, because of that
 , the database path it actually my network path
 
-###### To log in you can use `ADMIN1` or `ADMIN_MAN` to get fully access
+###### TO EDIT SQLITE DB You need to download DB BROWSER for SQLite
+###### To log in you can use `RZ000E0001` to get fully access
 
 v 2.0
 =
