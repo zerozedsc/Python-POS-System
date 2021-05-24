@@ -13,7 +13,12 @@ to become a host for local network and the database is inside network folder, be
 ###### TO EDIT SQLITE DB You need to download DB BROWSER for SQLite
 ###### To log in you can use `RZ0000E0001` to get fully access
 
-![face](/readme_img/1.webp)
+![face](/readme_img/0.webp) ![face](/readme_img/4.webp)
+![face](/readme_img/1.webp) ![face](/readme_img/5.webp)
+![face](/readme_img/2.webp) ![face](/readme_img/6.webp)
+![face](/readme_img/3.webp) ![face](/readme_img/7.webp)
+![face](/readme_img/8.webp) ![face](/readme_img/9.webp)
+
 
 v 2.0
 =
