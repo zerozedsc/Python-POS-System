@@ -13,7 +13,7 @@ to become a host for local network and the database is inside network folder, be
 ###### TO EDIT SQLITE DB You need to download DB BROWSER for SQLite
 ###### To log in you can use `RZ0000E0001` to get fully access
 
-![face](/zerozedsc/Python-Point-Of-Sale-System/readme_img/1.webm)
+![face](/zerozedsc/Python-Point-Of-Sale-System/readme_img/1.webp)
 
 v 2.0
 =
