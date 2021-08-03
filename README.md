@@ -10,8 +10,11 @@ Actually I try to make a database server but I did not know how to do that so I 
 to become a host for local network and the database is inside network folder, because of that
 , the database path it actually my network path
 
+
+
 ###### TO EDIT SQLITE DB You need to download DB BROWSER for SQLite
-###### To log in you can use `RZ0000E0001` to get fully access
+###### To log in you can use `ADMIN` to get fully access
+###### FIXED DATABASE PATH. SORRY IM FORGOT ABOUT THAT
 
 ![face](/readme_img/0.webp) ![face](/readme_img/4.webp)
 ![face](/readme_img/1.webp) ![face](/readme_img/5.webp)
