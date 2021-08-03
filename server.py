@@ -7,7 +7,7 @@ import tkinter as tk
 import sqlite3
 
 
-SERVER_PATH = '//Zerozed-pc/shared/DB/ROZERIYA-DB.db'
+SERVER_PATH = 'sqlite3.db'
 COUNTMAX = 10000
 LENMAX = 7
 
