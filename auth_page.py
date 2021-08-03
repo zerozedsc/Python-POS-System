@@ -4,9 +4,7 @@ from tkinter import *
 from tkinter.ttk import *
 from tkinter.ttk import Style
 from tkinter import messagebox
-import psycopg2
 from datetime import datetime
-import pyodbc
 import sqlite3
 from sys import exit
 from server import SERVER_PATH

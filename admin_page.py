@@ -15,7 +15,7 @@ import time
 from server import SERVER_PATH
 
 #Path
-EMPLOYEE_PHOTO_PATH = "//Zerozed-pc/shared/DB/Employee_Photo/"
+EMPLOYEE_PHOTO_PATH = "images\Emp_photo"
 
 class AdminWin():
     def __init__(self, master, ID='', POS=''):
@@ -258,7 +258,7 @@ class AdminWin():
             # print("comp: ", component)
 
         else:
-            Label(show, text="""CAN'T CONNECT DATABASE, 
+            Label(show, text="""CAN'T CONNECT DATABASE,
             PLEASE PRESS THE BUTTON AGAIN""", font=('comic sans ms', 18, 'italic', 'bold'), foreground='red').place(
                 relx=0, rely=0.5)
 
@@ -429,7 +429,7 @@ class AdminWin():
                             PRODUCT_TYPE= ?,
                             PRICE = ?,
                             QUANTITY = ?
-                    WHERE 
+                    WHERE
                             PRODUCT_ID = ?""", (NAMA, JENIS, HARGA, STOCK, ID))
                     conn.commit()
                     cursor.execute("UPDATE PRODUCT SET PRODUCT_TYPE = ? WHERE PRODUCT_ID = ?", (JENIS, ID))
@@ -439,21 +439,21 @@ class AdminWin():
                 elif self.adjustRead.get() == 'product name':
                     cursor.execute("""UPDATE PRODUCT_DATA
                                         SET PRODUCT_NAME = ?
-                                       WHERE 
+                                       WHERE
                                                PRODUCT_ID = ?""", (NAMA, ID))
                     conn.commit()
                     messagebox.showinfo("SUCCESS", f"ADJUST {ID} DONE")
                     self.adjustWin.destroy()
                 elif self.adjustRead.get() == 'product type':
                     cursor.execute("""UPDATE PRODUCT_DATA
-                                        SET 
+                                        SET
                                             PRODUCT_TYPE = ?
-                                       WHERE 
+                                       WHERE
                                                PRODUCT_ID = ?""", (JENIS, ID))
                     conn.commit()
                     cursor.execute("""UPDATE PRODUCT
                                                             SET PRODUCT_TYPE = ?
-                                                           WHERE 
+                                                           WHERE
                                                                    PRODUCT_ID = ?""", (JENIS, ID))
                     conn.commit()
                     messagebox.showinfo("SUCCESS", f"ADJUST {ID} DONE")
@@ -461,7 +461,7 @@ class AdminWin():
                 elif self.adjustRead.get() == 'price':
                     cursor.execute("""UPDATE PRODUCT_DATA
                                         SET PRICE = ?
-                                       WHERE 
+                                       WHERE
                                                PRODUCT_ID = ?""", (HARGA, ID))
                     conn.commit()
                     messagebox.showinfo("SUCCESS", f"ADJUST {ID} DONE")
@@ -469,7 +469,7 @@ class AdminWin():
                 elif self.adjustRead.get() == 'quantity':
                     cursor.execute("""UPDATE PRODUCT_DATA
                                         SET QUANTITY = ?
-                                       WHERE 
+                                       WHERE
                                                PRODUCT_ID = ?""", (STOCK, ID))
                     conn.commit()
                     messagebox.showinfo("SUCCESS", f"ADJUST {ID} DONE")
@@ -933,7 +933,7 @@ class AdminWin():
             self.data_table.configure(yscrollcommand=vsb.set, xscrollcommand=hrz.set)
 
         else:
-            Label(show, text="""CAN'T CONNECT DATABASE, 
+            Label(show, text="""CAN'T CONNECT DATABASE,
                        PLEASE PRESS THE BUTTON AGAIN""", font=('comic sans ms', 18, 'italic', 'bold'),
                   foreground='red').place(
                 relx=0, rely=0.5)

@@ -1576,7 +1576,7 @@ item\t       Qty   S/Price   Total  Off"""  # 2/slash
         try:
 
             DIR_PATH = str(datetime.now().strftime("%B")) + f"_{datetime.now().year}/"
-            SAVE_PATH = '//Zerozed-pc/shared/DB/Sales_Report/'+DIR_PATH
+            SAVE_PATH = 'data\Report Data\Report'+DIR_PATH
             BASE_FILE = 'data/Report Data' + '/daily_report_example.xlsx'
             EXCEL_FILE = SAVE_PATH + str(date.today()) + '.xlsx'
             base = []
