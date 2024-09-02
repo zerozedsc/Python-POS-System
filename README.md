@@ -1,5 +1,5 @@
 # Point Of Sale System made with python
-I make a P.O.S system with python for my father company Rozeriya Enterprise using Python. For the database i just use SQLITE for this time because i dont have much knowledge in using cloud database like mysql. I will always update this project
+I make a P.O.S system with python for small shop using Python. For the database i just use SQLITE for this time because i dont have much knowledge in using cloud database like mysql. I will always update this project
 
 _`PYTHON 3.8`To run this project you can start from session_start.py, and for the database
 you can change the path at `server.py`, var `SERVER_PATH`_ to actual local db location
