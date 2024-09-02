@@ -6,11 +6,6 @@ you can change the path at `server.py`, var `SERVER_PATH`_ to actual local db lo
 
 _~~I will add a function to access server database~~_
 
-Actually I try to make a database server but I did not know how to do that so I just using my computer 
-to become a host for local network and the database is inside network folder, because of that
-, the database path it actually my network path
-
-
 
 ###### TO EDIT SQLITE DB You need to download DB BROWSER for SQLite
 ###### To log in you can use `ADMIN` to get fully access
