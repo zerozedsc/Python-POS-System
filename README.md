@@ -1,3 +1,5 @@
+
+
 # Point Of Sale System made with python
 I make a P.O.S system with python for small shop using Python. For the database i just use SQLITE for this time because i dont have much knowledge in using cloud database like mysql. I will always update this project
 
@@ -8,7 +10,7 @@ _~~I will add a function to access server database~~_
 
 
 ###### TO EDIT SQLITE DB You need to download DB BROWSER for SQLite
-###### To log in you can use `ADMIN` to get fully access
+###### To log in you can use `ADMINTESTER` to get full access
 ###### FIXED DATABASE PATH. SORRY IM FORGOT ABOUT THAT
 
 ![face](/readme_img/0.webp) ![face](/readme_img/4.webp)
@@ -36,4 +38,3 @@ admin_page.py
 
 session_start.py
 - Add add stock function in session choice window
-
